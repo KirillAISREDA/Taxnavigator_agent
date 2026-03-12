@@ -94,9 +94,17 @@ async def lifespan(app: FastAPI):
     await app.state.redis.connect()
 
     # Start Telegram polling if token is set but no HTTPS webhook
+    # Use a file lock so only one worker runs polling
     polling_task = None
+    poll_lock = None
     if settings.telegram_bot_token and not settings.telegram_webhook_url.startswith("https"):
-        polling_task = asyncio.create_task(_telegram_polling(app))
+        import fcntl
+        try:
+            poll_lock = open("/tmp/taxnav_tg_poll.lock", "w")
+            fcntl.flock(poll_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            polling_task = asyncio.create_task(_telegram_polling(app))
+        except (IOError, OSError):
+            logger.info("Telegram polling: another worker holds the lock, skipping")
 
     logger.info("All services initialized successfully")
     yield
@@ -108,6 +116,8 @@ async def lifespan(app: FastAPI):
             await polling_task
         except asyncio.CancelledError:
             pass
+    if poll_lock:
+        poll_lock.close()
     await app.state.redis.disconnect()
     logger.info("TaxNavigator AI Agent shut down")
 
