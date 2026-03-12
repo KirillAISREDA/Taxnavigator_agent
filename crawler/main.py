@@ -73,7 +73,8 @@ class KnowledgeCrawler:
         logger.info("Crawling source", source_id=source_id, base_url=base_url)
 
         visited = set()
-        to_visit = [base_url]
+        start_urls = source.get("start_urls", [base_url])
+        to_visit = list(start_urls)
         all_chunks = []
 
         while to_visit and len(visited) < max_pages:

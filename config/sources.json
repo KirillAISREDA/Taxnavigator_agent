@@ -49,6 +49,12 @@
       "language": "nl",
       "max_pages": 100,
       "priority": 3,
+      "start_urls": [
+        "https://www.rijksoverheid.nl/onderwerpen/belastingplan",
+        "https://www.rijksoverheid.nl/onderwerpen/inkomstenbelasting",
+        "https://www.rijksoverheid.nl/onderwerpen/btw",
+        "https://www.rijksoverheid.nl/onderwerpen/vennootschapsbelasting"
+      ],
       "allowed_paths": ["/onderwerpen/belastingplan", "/onderwerpen/inkomstenbelasting", "/onderwerpen/btw", "/onderwerpen/vennootschapsbelasting"],
       "description": "Налоговые ставки и законодательство"
     },
@@ -60,8 +66,12 @@
       "language": "nl",
       "max_pages": 50,
       "priority": 4,
+      "start_urls": [
+        "https://www.nba.nl/wet--en-regelgeving/",
+        "https://www.nba.nl/themas/",
+        "https://www.nba.nl/over-nba/"
+      ],
       "allowed_paths": ["/wet--en-regelgeving", "/themas", "/over-nba"],
-      "accept_status": [200, 404],
       "description": "Профессиональная бухгалтерская информация"
     },
     {
@@ -86,15 +96,18 @@
       "description": "Статус украинцев, право на работу, бизнес"
     },
     {
-      "id": "refugeehelp",
-      "name": "VluchtelingenWerk Nederland",
-      "base_url": "https://www.vluchtelingenwerk.nl",
+      "id": "refugeehelp_gov",
+      "name": "Rijksoverheid - Opvang Oekraïne",
+      "base_url": "https://www.rijksoverheid.nl",
       "category": "ukrainian_support",
       "language": "nl",
       "max_pages": 50,
       "priority": 2,
-      "allowed_paths": ["/oekraine", "/informatie-voor-vluchtelingen"],
-      "description": "Поддержка и ресурсы для украинцев в Нидерландах"
+      "start_urls": [
+        "https://www.rijksoverheid.nl/onderwerpen/opvang-vluchtelingen-uit-oekraine"
+      ],
+      "allowed_paths": ["/onderwerpen/opvang-vluchtelingen-uit-oekraine"],
+      "description": "Поддержка и ресурсы для украинцев в Нидерландах (гос. портал)"
     },
     {
       "id": "belastingdienst_intl",
@@ -104,6 +117,9 @@
       "language": "nl",
       "max_pages": 50,
       "priority": 3,
+      "start_urls": [
+        "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/internationaal"
+      ],
       "allowed_paths": ["/wps/wcm/connect/bldcontentnl/belastingdienst/prive/internationaal"],
       "description": "Двойное налогообложение, международные налоговые ситуации NL-UA"
     }
