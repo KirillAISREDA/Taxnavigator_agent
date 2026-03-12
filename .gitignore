@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+data/qdrant_storage/
+.vscode/
+.idea/
+*.tar.gz

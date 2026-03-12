@@ -1,0 +1,24 @@
+[Unit]
+Description=TaxNavigator GitHub Webhook Listener
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/Taxnavigator_agent
+
+# Set your secret here (same as in GitHub webhook settings)
+Environment=GITHUB_WEBHOOK_SECRET=CHANGE_ME_TO_RANDOM_STRING
+Environment=DEPLOY_SCRIPT=/opt/Taxnavigator_agent/deploy.sh
+Environment=DEPLOY_BRANCH=main
+Environment=WEBHOOK_PORT=9000
+Environment=DEPLOY_LOG=/opt/Taxnavigator_agent/deploy.log
+
+ExecStart=/usr/bin/python3 /opt/Taxnavigator_agent/webhook/server.py
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

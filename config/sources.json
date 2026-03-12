@@ -1,0 +1,120 @@
+{
+  "sources": [
+    {
+      "id": "taxnavigator",
+      "name": "TaxNavigator & Advice B.V.",
+      "base_url": "https://taxnavigator-advice.nl",
+      "category": "company",
+      "language": "nl",
+      "max_pages": 50,
+      "priority": 1,
+      "description": "Сайт компании — услуги, цены, контакты, FAQ"
+    },
+    {
+      "id": "belastingdienst",
+      "name": "Belastingdienst",
+      "base_url": "https://www.belastingdienst.nl",
+      "category": "tax",
+      "language": "nl",
+      "max_pages": 200,
+      "priority": 2,
+      "allowed_paths": ["/wps/wcm/connect/bldcontentnl/belastingdienst/"],
+      "description": "Налоговая служба Нидерландов"
+    },
+    {
+      "id": "kvk",
+      "name": "Kamer van Koophandel",
+      "base_url": "https://www.kvk.nl",
+      "category": "business_registration",
+      "language": "nl",
+      "max_pages": 100,
+      "priority": 2,
+      "description": "Торговая палата — регистрация компаний"
+    },
+    {
+      "id": "rvo",
+      "name": "Rijksdienst voor Ondernemend Nederland",
+      "base_url": "https://www.rvo.nl",
+      "category": "subsidies",
+      "language": "nl",
+      "max_pages": 100,
+      "priority": 3,
+      "description": "Государственные субсидии и программы"
+    },
+    {
+      "id": "rijksoverheid",
+      "name": "Rijksoverheid",
+      "base_url": "https://www.rijksoverheid.nl",
+      "category": "legislation",
+      "language": "nl",
+      "max_pages": 100,
+      "priority": 3,
+      "allowed_paths": ["/onderwerpen/belasting"],
+      "description": "Налоговые ставки и законодательство"
+    },
+    {
+      "id": "nba",
+      "name": "NBA - Beroepsorganisatie van accountants",
+      "base_url": "https://www.nba.nl",
+      "category": "accounting",
+      "language": "nl",
+      "max_pages": 50,
+      "priority": 4,
+      "description": "Профессиональная бухгалтерская информация"
+    },
+    {
+      "id": "rjnet",
+      "name": "Raad voor de Jaarverslaggeving",
+      "base_url": "https://www.rjnet.nl",
+      "category": "reporting_standards",
+      "language": "nl",
+      "max_pages": 50,
+      "priority": 4,
+      "description": "Стандарты финансовой отчётности NL"
+    },
+    {
+      "id": "ind",
+      "name": "Immigratie- en Naturalisatiedienst",
+      "base_url": "https://ind.nl",
+      "category": "ukrainian_status",
+      "language": "nl",
+      "max_pages": 80,
+      "priority": 2,
+      "allowed_paths": ["/oekraine", "/ukraine"],
+      "description": "Статус украинцев, право на работу, бизнес"
+    },
+    {
+      "id": "refugeehelp",
+      "name": "RefugeeHelp Ukraine",
+      "base_url": "https://www.refugeehelp.nl/uk",
+      "category": "ukrainian_support",
+      "language": "uk",
+      "max_pages": 50,
+      "priority": 2,
+      "description": "Портал поддержки украинцев в Нидерландах"
+    },
+    {
+      "id": "oecd",
+      "name": "OECD Tax Treaties",
+      "base_url": "https://www.oecd.org",
+      "category": "double_taxation",
+      "language": "en",
+      "max_pages": 30,
+      "priority": 3,
+      "allowed_paths": ["/tax/treaties", "/ctp"],
+      "description": "Налоговые соглашения Украина-NL, двойное налогообложение"
+    }
+  ],
+  "categories": {
+    "company": "Информация о TaxNavigator & Advice B.V.",
+    "tax": "Налоги в Нидерландах (BTW, IB, Vpb, dividendbelasting)",
+    "business_registration": "Регистрация бизнеса (KVK, eenmanszaak, BV, VOF)",
+    "subsidies": "Государственные субсидии и программы поддержки",
+    "legislation": "Налоговое законодательство и ставки",
+    "accounting": "Бухгалтерский учёт и стандарты",
+    "reporting_standards": "Стандарты финансовой отчётности (Dutch GAAP)",
+    "ukrainian_status": "Статус украинцев в NL (вид на жительство, работа, бизнес)",
+    "ukrainian_support": "Поддержка и ресурсы для украинцев",
+    "double_taxation": "Двойное налогообложение Украина-NL"
+  }
+}

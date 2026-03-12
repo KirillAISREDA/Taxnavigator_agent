@@ -1,0 +1,98 @@
+version: "3.8"
+
+services:
+  # ============================================
+  # Backend API (FastAPI) - мозг агента
+  # ============================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taxnav-api
+    restart: unless-stopped
+    ports:
+      - "8100:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    depends_on:
+      qdrant:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - taxnav-net
+    mem_limit: 512m
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # ============================================
+  # Qdrant - векторная база знаний
+  # ============================================
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    container_name: taxnav-qdrant
+    restart: unless-stopped
+    volumes:
+      - ./data/qdrant_storage:/qdrant/storage
+    ports:
+      - "6333:6333"
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - taxnav-net
+    mem_limit: 1g
+
+  # ============================================
+  # Redis - кэш сессий + rate limiting
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: taxnav-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - taxnav-net
+    mem_limit: 256m
+
+  # ============================================
+  # Crawler - переиндексация источников (по расписанию)
+  # ============================================
+  crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile.crawler
+    container_name: taxnav-crawler
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    networks:
+      - taxnav-net
+    mem_limit: 512m
+
+networks:
+  taxnav-net:
+    driver: bridge
+
+volumes:
+  redis-data:
