@@ -93,8 +93,17 @@ class KnowledgeCrawler:
 
             try:
                 resp = await self.http.get(url)
-                if resp.status_code != 200:
+                accept_status = source.get("accept_status", [200])
+                if resp.status_code not in accept_status:
                     continue
+
+                # Re-check allowed paths after redirect
+                if allowed_paths and str(resp.url) != url:
+                    from urllib.parse import urlparse
+                    final_path = urlparse(str(resp.url)).path
+                    if not any(final_path.startswith(ap) for ap in allowed_paths):
+                        # Follow redirect but still extract links from redirected page
+                        pass
                 if "text/html" not in resp.headers.get("content-type", ""):
                     continue
 
@@ -111,10 +120,11 @@ class KnowledgeCrawler:
                 chunks = self._chunk_text(text, source, url, title)
                 all_chunks.extend(chunks)
 
-                # Find links for further crawling
+                # Find links for further crawling (use final URL after redirects)
+                link_base = str(resp.url) if str(resp.url).startswith(base_url) else base_url
                 for a in soup.find_all("a", href=True):
                     href = a["href"]
-                    full_url = self._resolve_url(base_url, href)
+                    full_url = self._resolve_url(link_base, href)
                     if full_url and full_url.startswith(base_url) and full_url not in visited:
                         to_visit.append(full_url)
 
