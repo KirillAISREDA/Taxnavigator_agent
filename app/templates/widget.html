@@ -5,388 +5,165 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxNavigator Chat</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --primary: #1B4D3E;
-      --primary-light: #2A7A5F;
-      --bg: #F8F9FA;
-      --white: #FFFFFF;
-      --gray-100: #F1F3F5;
-      --gray-300: #DEE2E6;
-      --gray-500: #868E96;
-      --gray-800: #343A40;
-      --text: #212529;
-      --shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Header */
-    .header {
-      background: var(--primary);
-      color: white;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-    .header-logo {
-      width: 40px; height: 40px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-    }
-    .header-info h1 { font-size: 15px; font-weight: 600; }
-    .header-info p { font-size: 12px; opacity: 0.8; }
-    .header-close {
-      margin-left: auto;
-      background: none; border: none; color: white;
-      cursor: pointer; font-size: 20px; opacity: 0.7;
-      padding: 4px 8px;
-    }
-    .header-close:hover { opacity: 1; }
-
-    /* Messages area */
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .message {
-      max-width: 85%;
-      padding: 12px 16px;
-      border-radius: 16px;
-      font-size: 14px;
-      line-height: 1.5;
-      animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .message.bot {
-      background: var(--white);
-      color: var(--text);
-      border-bottom-left-radius: 4px;
-      align-self: flex-start;
-      box-shadow: var(--shadow);
-    }
-    .message.user {
-      background: var(--primary);
-      color: white;
-      border-bottom-right-radius: 4px;
-      align-self: flex-end;
-    }
-
-    .message .sources {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid var(--gray-300);
-      font-size: 11px;
-      color: var(--gray-500);
-    }
-    .message .sources a {
-      color: var(--primary-light);
-      text-decoration: none;
-    }
-
-    .typing-indicator {
-      display: flex; gap: 4px; padding: 12px 16px;
-      background: var(--white); border-radius: 16px;
-      border-bottom-left-radius: 4px;
-      align-self: flex-start;
-      box-shadow: var(--shadow);
-    }
-    .typing-indicator span {
-      width: 8px; height: 8px;
-      background: var(--gray-300);
-      border-radius: 50%;
-      animation: bounce 1.4s infinite;
-    }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-6px); }
-    }
-
-    /* Escalation banner */
-    .escalation {
-      background: #FFF3CD;
-      border: 1px solid #FFECB5;
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin: 4px 0;
-      font-size: 13px;
-      color: #664D03;
-      align-self: flex-start;
-      max-width: 85%;
-    }
-    .escalation a {
-      color: var(--primary);
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    /* Quick actions */
-    .quick-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 0 20px 12px;
-    }
-    .quick-action {
-      background: var(--white);
-      border: 1px solid var(--gray-300);
-      border-radius: 20px;
-      padding: 8px 14px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: var(--gray-800);
-    }
-    .quick-action:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: #F0F7F4;
-    }
-
-    /* Input area */
-    .input-area {
-      padding: 12px 16px;
-      background: var(--white);
-      border-top: 1px solid var(--gray-100);
-      display: flex;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-    .input-area input {
-      flex: 1;
-      border: 1px solid var(--gray-300);
-      border-radius: 24px;
-      padding: 10px 16px;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .input-area input:focus {
-      border-color: var(--primary);
-    }
-    .input-area button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px; height: 40px;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-    .input-area button:hover { background: var(--primary-light); }
-    .input-area button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    /* Language selector */
-    .lang-bar {
-      display: flex; justify-content: center; gap: 4px;
-      padding: 8px;
-      background: var(--gray-100);
-      font-size: 12px;
-    }
-    .lang-bar button {
-      background: none; border: 1px solid transparent;
-      border-radius: 12px; padding: 4px 10px;
-      cursor: pointer; color: var(--gray-500);
-      transition: all 0.2s;
-    }
-    .lang-bar button.active, .lang-bar button:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: var(--white);
-    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--pri:#1B4D3E;--pri-l:#2A7A5F;--bg:#F8F9FA;--wh:#FFF;--g1:#F1F3F5;--g3:#DEE2E6;--g5:#868E96;--g8:#343A40;--tx:#212529;--sh:0 2px 8px rgba(0,0,0,.08)}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);height:100vh;display:flex;flex-direction:column}
+    .header{background:var(--pri);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .header-logo{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .header-info h1{font-size:15px;font-weight:600}.header-info p{font-size:12px;opacity:.8}
+    .header-close{margin-left:auto;background:none;border:none;color:#fff;cursor:pointer;font-size:20px;opacity:.7;padding:4px 8px}.header-close:hover{opacity:1}
+    .messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+    .message{max-width:85%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.5;animation:fadeIn .3s ease;white-space:pre-wrap}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .message.bot{background:var(--wh);color:var(--tx);border-bottom-left-radius:4px;align-self:flex-start;box-shadow:var(--sh)}
+    .message.user{background:var(--pri);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+    .message .sources{margin-top:8px;padding-top:8px;border-top:1px solid var(--g3);font-size:11px;color:var(--g5)}
+    .message .sources a{color:var(--pri-l);text-decoration:none}
+    .message .file-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);padding:2px 10px;border-radius:10px;font-size:12px;margin-bottom:6px}
+    .message.bot .file-badge{background:#E8F5E9;color:#2E7D32}
+    .message .file-thumb{max-width:180px;max-height:120px;border-radius:8px;margin-bottom:8px;display:block}
+    .typing-indicator{display:flex;gap:4px;padding:12px 16px;background:var(--wh);border-radius:16px;border-bottom-left-radius:4px;align-self:flex-start;box-shadow:var(--sh)}
+    .typing-indicator span{width:8px;height:8px;background:var(--g3);border-radius:50%;animation:bounce 1.4s infinite}
+    .typing-indicator span:nth-child(2){animation-delay:.2s}.typing-indicator span:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+    .escalation{background:#FFF3CD;border:1px solid #FFECB5;border-radius:12px;padding:12px 16px;margin:4px 0;font-size:13px;color:#664D03;align-self:flex-start;max-width:85%}
+    .escalation a{color:var(--pri);font-weight:600;text-decoration:none}
+    .quick-actions{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 12px}
+    .quick-action{background:var(--wh);border:1px solid var(--g3);border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;transition:all .2s;color:var(--g8)}
+    .quick-action:hover{border-color:var(--pri);color:var(--pri);background:#F0F7F4}
+    .file-bar{display:none;padding:8px 16px;background:var(--g1);border-top:1px solid var(--g3);align-items:center;gap:10px;flex-shrink:0}
+    .file-bar.active{display:flex}
+    .file-bar img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--g3)}
+    .file-bar .icon{width:44px;height:44px;border-radius:8px;background:var(--wh);border:1px solid var(--g3);display:flex;align-items:center;justify-content:center;font-size:20px}
+    .file-bar .info{flex:1;min-width:0}
+    .file-bar .name{font-size:13px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .file-bar .size{font-size:11px;color:var(--g5)}
+    .file-bar .rm{background:none;border:none;cursor:pointer;font-size:18px;color:var(--g5);padding:4px}.file-bar .rm:hover{color:var(--tx)}
+    .drop-overlay{display:none;position:fixed;inset:0;background:rgba(27,77,62,.12);z-index:100;align-items:center;justify-content:center;pointer-events:none}
+    .drop-overlay.active{display:flex}
+    .drop-box{background:var(--wh);border:2px dashed var(--pri);border-radius:16px;padding:32px 48px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+    .drop-box .ic{font-size:40px}.drop-box p{font-size:16px;font-weight:500;color:var(--pri);margin-top:8px}
+    .input-area{padding:12px 16px;background:var(--wh);border-top:1px solid var(--g1);display:flex;gap:8px;align-items:center;flex-shrink:0}
+    .input-area input{flex:1;border:1px solid var(--g3);border-radius:24px;padding:10px 16px;font-size:14px;outline:none;transition:border-color .2s}
+    .input-area input:focus{border-color:var(--pri)}
+    .ib{background:none;border:none;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .2s;color:var(--g5);flex-shrink:0}
+    .ib:hover{background:var(--g1);color:var(--pri)}
+    .ib.send{background:var(--pri);color:#fff}.ib.send:hover{background:var(--pri-l)}.ib.send:disabled{opacity:.5;cursor:not-allowed}
+    .lang-bar{display:flex;justify-content:center;gap:4px;padding:8px;background:var(--g1);font-size:12px}
+    .lang-bar button{background:none;border:1px solid transparent;border-radius:12px;padding:4px 10px;cursor:pointer;color:var(--g5);transition:all .2s}
+    .lang-bar button.active,.lang-bar button:hover{border-color:var(--pri);color:var(--pri);background:var(--wh)}
+    #fileInput{display:none}
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <div class="header">
-    <div class="header-logo">🧭</div>
-    <div class="header-info">
-      <h1>TaxNavigator Assistant</h1>
-      <p>Online — antwoord binnen seconden</p>
-    </div>
-    <button class="header-close" onclick="parent.postMessage('taxnav-close','*')" title="Sluiten">&times;</button>
-  </div>
+<div class="header">
+  <div class="header-logo">🧭</div>
+  <div class="header-info"><h1>TaxNavigator Assistant</h1><p>Online — antwoord binnen seconden</p></div>
+  <button class="header-close" onclick="parent.postMessage('taxnav-close','*')">&times;</button>
+</div>
+<div class="lang-bar">
+  <button class="active" data-lang="nl">NL</button>
+  <button data-lang="uk">UA</button>
+  <button data-lang="ru">RU</button>
+  <button data-lang="en">EN</button>
+</div>
+<div class="messages" id="messages">
+  <div class="message bot">Welkom bij TaxNavigator &amp; Advice! 👋<br><br>Ik kan u helpen met vragen over belastingen, bedrijfsregistratie, boekhouding en meer.<br>U kunt ook <b>documenten en foto's</b> uploaden — ik analyseer en vertaal ze voor u.<br><br>Hoe kan ik u helpen?</div>
+</div>
+<div class="quick-actions" id="qa">
+  <div class="quick-action" onclick="sendQuick('Wat zijn jullie diensten?')">📋 Diensten</div>
+  <div class="quick-action" onclick="sendQuick('Hoe registreer ik een bedrijf?')">🏢 KVK registratie</div>
+  <div class="quick-action" onclick="sendQuick('BTW aangifte uitleg')">💰 BTW</div>
+  <div class="quick-action" onclick="sendQuick('Ik ben Oekraïner, wat zijn mijn rechten?')">🇺🇦 Для українців</div>
+</div>
+<div class="drop-overlay" id="dropOverlay"><div class="drop-box"><div class="ic">📄</div><p>Drop uw document hier</p></div></div>
+<div class="file-bar" id="fileBar">
+  <div id="fileThumb"></div>
+  <div class="info"><div class="name" id="fileName"></div><div class="size" id="fileSize"></div></div>
+  <button class="rm" onclick="removeFile()">&times;</button>
+</div>
+<div class="input-area">
+  <button class="ib" onclick="document.getElementById('fileInput').click()" title="Upload document">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+  </button>
+  <input type="text" id="input" placeholder="Stel uw vraag..." autocomplete="off">
+  <button class="ib send" id="sendBtn" onclick="sendMessage()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+  </button>
+</div>
+<input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf" onchange="handleFileSelect(this.files[0])">
 
-  <!-- Language bar -->
-  <div class="lang-bar">
-    <button class="active" data-lang="nl">NL</button>
-    <button data-lang="uk">UA</button>
-    <button data-lang="ru">RU</button>
-    <button data-lang="en">EN</button>
-  </div>
+<script>
+const API='/api/chat/',API_UP='/api/chat/upload';
+let sessionId=null,pendingFile=null;
+const $m=document.getElementById('messages'),$i=document.getElementById('input'),$s=document.getElementById('sendBtn'),$qa=document.getElementById('qa'),$bar=document.getElementById('fileBar'),$drop=document.getElementById('dropOverlay');
 
-  <!-- Messages -->
-  <div class="messages" id="messages">
-    <div class="message bot">
-      Welkom bij TaxNavigator & Advice! 👋<br><br>
-      Ik kan u helpen met vragen over belastingen, bedrijfsregistratie, boekhouding en meer.
-      Hoe kan ik u helpen?
-    </div>
-  </div>
+document.querySelectorAll('.lang-bar button').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.lang-bar button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const g={nl:'Stel uw vraag...',uk:'Поставте своє запитання...',ru:'Задайте ваш вопрос...',en:'Ask your question...'};$i.placeholder=g[b.dataset.lang]||g.en})});
+$i.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
 
-  <!-- Quick actions (shown initially) -->
-  <div class="quick-actions" id="quickActions">
-    <div class="quick-action" onclick="sendQuick('Wat zijn jullie diensten?')">📋 Diensten</div>
-    <div class="quick-action" onclick="sendQuick('Hoe registreer ik een bedrijf?')">🏢 KVK registratie</div>
-    <div class="quick-action" onclick="sendQuick('BTW aangifte uitleg')">💰 BTW</div>
-    <div class="quick-action" onclick="sendQuick('Ik ben Oekraïner, wat zijn mijn rechten?')">🇺🇦 Для українців</div>
-  </div>
+// drag & drop
+let dc=0;
+document.addEventListener('dragenter',e=>{e.preventDefault();dc++;$drop.classList.add('active')});
+document.addEventListener('dragleave',e=>{e.preventDefault();dc--;if(dc<=0){$drop.classList.remove('active');dc=0}});
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{e.preventDefault();dc=0;$drop.classList.remove('active');if(e.dataTransfer.files[0])handleFileSelect(e.dataTransfer.files[0])});
 
-  <!-- Input -->
-  <div class="input-area">
-    <input type="text" id="input" placeholder="Stel uw vraag..." autocomplete="off">
-    <button id="sendBtn" onclick="sendMessage()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="22" y1="2" x2="11" y2="13"></line>
-        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-      </svg>
-    </button>
-  </div>
+// clipboard paste
+document.addEventListener('paste',e=>{const items=e.clipboardData?.items;if(!items)return;for(const it of items){if(it.type.startsWith('image/')){e.preventDefault();handleFileSelect(it.getAsFile());return}}});
 
-  <script>
-    const API_URL = '/api/chat/';
-    let sessionId = null;
+function handleFileSelect(f){
+  if(!f)return;
+  const ext='.'+f.name.split('.').pop().toLowerCase();
+  if(!['.jpg','.jpeg','.png','.gif','.webp','.pdf'].includes(ext)){alert('Supported: JPG, PNG, GIF, WEBP, PDF');return}
+  if(f.size>10*1024*1024){alert('Max 10 MB');return}
+  pendingFile=f;
+  const th=document.getElementById('fileThumb');
+  th.innerHTML=f.type.startsWith('image/')?`<img src="${URL.createObjectURL(f)}">`:'<div class="icon">📄</div>';
+  document.getElementById('fileName').textContent=f.name;
+  const kb=(f.size/1024).toFixed(0);
+  document.getElementById('fileSize').textContent=kb>1024?(f.size/1024/1024).toFixed(1)+' MB':kb+' KB';
+  $bar.classList.add('active');
+}
+function removeFile(){pendingFile=null;$bar.classList.remove('active');document.getElementById('fileInput').value=''}
 
-    const messagesEl = document.getElementById('messages');
-    const inputEl = document.getElementById('input');
-    const sendBtn = document.getElementById('sendBtn');
-    const quickActionsEl = document.getElementById('quickActions');
+function addMsg(text,type,o={}){
+  const d=document.createElement('div');d.className=`message ${type}`;let h='';
+  if(o.fileName&&type==='user'){if(o.thumbUrl)h+=`<img class="file-thumb" src="${o.thumbUrl}">`;h+=`<span class="file-badge">📄 ${o.fileName}</span><br>`}
+  if(o.docType&&type==='bot')h+=`<span class="file-badge">📄 ${o.docType}</span><br>`;
+  h+=text.replace(/\n/g,'<br>');
+  if(o.sources?.length&&type==='bot')h+='<div class="sources">📎 '+o.sources.filter(Boolean).map(s=>{try{return`<a href="${s}" target="_blank">${new URL(s).hostname}</a>`}catch{return''}}).join(' · ')+'</div>';
+  d.innerHTML=h;$m.appendChild(d);$m.scrollTop=$m.scrollHeight;
+}
+function addEsc(){const d=document.createElement('div');d.className='escalation';d.innerHTML='💡 Wilt u een afspraak maken met onze specialist? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Neem contact op</a>';$m.appendChild(d);$m.scrollTop=$m.scrollHeight}
+function showTyping(){const d=document.createElement('div');d.className='typing-indicator';d.id='typing';d.innerHTML='<span></span><span></span><span></span>';$m.appendChild(d);$m.scrollTop=$m.scrollHeight}
+function hideTyping(){document.getElementById('typing')?.remove()}
+function sendQuick(t){$i.value=t;sendMessage()}
 
-    // Language switcher
-    document.querySelectorAll('.lang-bar button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.lang-bar button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const lang = btn.dataset.lang;
-        const greetings = {
-          nl: 'Stel uw vraag...',
-          uk: 'Поставте своє запитання...',
-          ru: 'Задайте ваш вопрос...',
-          en: 'Ask your question...',
-        };
-        inputEl.placeholder = greetings[lang] || greetings.en;
-      });
-    });
-
-    // Send on Enter
-    inputEl.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-
-    function sendQuick(text) {
-      inputEl.value = text;
-      sendMessage();
+async function sendMessage(){
+  const text=$i.value.trim();
+  if(!text&&!pendingFile)return;
+  $qa.style.display='none';
+  const mo={};let tu=null;
+  if(pendingFile){mo.fileName=pendingFile.name;if(pendingFile.type.startsWith('image/'))mo.thumbUrl=tu=URL.createObjectURL(pendingFile)}
+  addMsg(text||`📄 ${pendingFile?.name||''}`,'user',mo);
+  $i.value='';$s.disabled=true;showTyping();
+  try{
+    let data;
+    if(pendingFile){
+      const fd=new FormData();fd.append('file',pendingFile);fd.append('message',text);
+      if(sessionId)fd.append('session_id',sessionId);fd.append('channel','web');
+      data=await(await fetch(API_UP,{method:'POST',body:fd})).json();
+      removeFile();
+    }else{
+      data=await(await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,session_id:sessionId,channel:'web'})})).json();
     }
-
-    function addMessage(text, type, sources = []) {
-      const div = document.createElement('div');
-      div.className = `message ${type}`;
-      div.innerHTML = text.replace(/\n/g, '<br>');
-
-      if (sources.length > 0 && type === 'bot') {
-        const srcDiv = document.createElement('div');
-        srcDiv.className = 'sources';
-        srcDiv.innerHTML = '📎 ' + sources
-          .filter(s => s)
-          .map(s => `<a href="${s}" target="_blank">${new URL(s).hostname}</a>`)
-          .join(' · ');
-        div.appendChild(srcDiv);
-      }
-
-      messagesEl.appendChild(div);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    function addEscalation() {
-      const div = document.createElement('div');
-      div.className = 'escalation';
-      div.innerHTML = '💡 Wilt u een afspraak maken met onze specialist? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Neem contact op</a>';
-      messagesEl.appendChild(div);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    function showTyping() {
-      const div = document.createElement('div');
-      div.className = 'typing-indicator';
-      div.id = 'typing';
-      div.innerHTML = '<span></span><span></span><span></span>';
-      messagesEl.appendChild(div);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    function hideTyping() {
-      const el = document.getElementById('typing');
-      if (el) el.remove();
-    }
-
-    async function sendMessage() {
-      const text = inputEl.value.trim();
-      if (!text) return;
-
-      // Hide quick actions after first message
-      quickActionsEl.style.display = 'none';
-
-      addMessage(text, 'user');
-      inputEl.value = '';
-      sendBtn.disabled = true;
-      showTyping();
-
-      try {
-        const resp = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: text,
-            session_id: sessionId,
-            channel: 'web',
-          }),
-        });
-        const data = await resp.json();
-
-        hideTyping();
-        sessionId = data.session_id;
-        addMessage(data.response, 'bot', data.sources);
-
-        if (data.needs_escalation) {
-          addEscalation();
-        }
-      } catch (err) {
-        hideTyping();
-        addMessage('Er is een fout opgetreden. Probeer het opnieuw.', 'bot');
-        console.error('Chat error:', err);
-      } finally {
-        sendBtn.disabled = false;
-        inputEl.focus();
-      }
-    }
-  </script>
+    hideTyping();sessionId=data.session_id;
+    addMsg(data.response,'bot',{sources:data.sources,docType:data.document_type});
+    if(data.needs_escalation)addEsc();
+  }catch(err){hideTyping();addMsg('Er is een fout opgetreden. Probeer het opnieuw.','bot');console.error(err)}
+  finally{$s.disabled=false;$i.focus();if(tu)URL.revokeObjectURL(tu)}
+}
+</script>
 </body>
 </html>
