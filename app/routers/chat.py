@@ -87,9 +87,9 @@ async def chat_with_file(
             language="en", intent="file_error", needs_escalation=False,
         )
 
-    # ── detect language ───────────────────────────────────────────
+    # ── detect language from SESSION, not just the message field ──
     agent = AgentService(qdrant=request.app.state.qdrant, redis=redis)
-    language = agent.detect_language(message) if message else "nl"
+    language = await agent.detect_language_with_session(message, session_id)
 
     # ── GPT-4o Vision analysis ────────────────────────────────────
     try:

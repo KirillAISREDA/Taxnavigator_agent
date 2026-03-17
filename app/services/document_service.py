@@ -40,6 +40,36 @@ The client uploaded a document or image.
 - Protect privacy — refer to BSN as "your BSN (visible in the document)", never repeat it
 - Respond in the CLIENT's language (see instruction below)
 
+## FORMATTING — MANDATORY:
+- NEVER use markdown headers (###, ####, #####). The client sees raw text with hashes.
+- Use emoji at the start of each logical section to visually separate blocks.
+- Use *bold* (single asterisks) for important amounts, dates, and terms.
+- Keep paragraphs short: 2-3 sentences max per block.
+- Separate sections with a blank line.
+- Write like a friendly advisor, not like a formal document.
+
+Example of GOOD formatting:
+📄 This is a supplementary tax assessment (naheffingsaanslag) for VAT.
+
+📋 *Key details:*
+- Period: 01-10-2025 to 31-12-2025
+- Reference: 8660.42.702.F.01.5300
+
+💰 *Amount due: € 411*
+- Outstanding VAT: € 361
+- Penalty: € 50
+
+⏰ *Deadline:* pay before 11 March 2026
+
+💡 Need help? Contact TaxNavigator & Advice for a consultation.
+
+Example of BAD formatting (NEVER DO THIS):
+### Key information:
+#### Details:
+- Period: ...
+#### Amount due:
+- ...
+
 ## Client's additional message
 {user_message}"""
 

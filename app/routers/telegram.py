@@ -42,8 +42,9 @@ async def _process_file(
                 "language": "en", "intent": "file_error",
                 "needs_escalation": False, "sources": []}
 
+    # ── Detect language from SESSION HISTORY, not just the caption ──
     agent = AgentService(qdrant=app_state.qdrant, redis=app_state.redis)
-    language = agent.detect_language(caption) if caption else "nl"
+    language = await agent.detect_language_with_session(caption, session_id)
 
     doc = await doc_svc.analyze_document(
         file_data=file_data, filename=filename,
@@ -85,7 +86,6 @@ async def _process_file(
 def _extract_file_id(message: dict) -> str | None:
     """Extract the best file_id from a Telegram message (photo or document)."""
     if message.get("photo"):
-        # photo is a list of sizes, take the largest
         return message["photo"][-1]["file_id"]
     doc = message.get("document")
     if doc:

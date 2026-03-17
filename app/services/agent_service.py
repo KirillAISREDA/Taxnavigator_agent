@@ -1,6 +1,10 @@
 """Core AI Agent — intent routing, RAG retrieval, response generation.
-Changes vs original:
-  • _build_system_prompt now injects the anti_diy_prompt from prompts.json
+Changes:
+  • detect_language_with_session: resolves language from session history
+    when the current message is empty/short (e.g. file upload w/o caption).
+    Ensures the bot always replies in the CLIENT's language.
+  • _build_system_prompt injects formatting_prompt (no ###/####, use emoji)
+  • _build_system_prompt injects anti_diy_prompt from prompts.json
   • _check_escalation expanded with tax_filing, business_registration
 """
 
@@ -41,6 +45,51 @@ class AgentService:
             return "en"
         except Exception:
             return "en"
+
+    async def detect_language_with_session(
+        self, text: str | None, session_id: str,
+    ) -> str:
+        """Detect language from text; if text is empty or too short for
+        reliable detection, infer from recent *user* messages in session.
+
+        Priority:
+        1. Current text (if >= 8 chars — enough for langdetect)
+        2. Last user messages from session history
+        3. Current text even if short
+        4. Default "nl"
+        """
+        # 1. Try current text first (if substantial)
+        if text and len(text.strip()) >= 8:
+            lang = self.detect_language(text)
+            if lang:
+                return lang
+
+        # 2. Fall back to session history
+        try:
+            history = await self.redis.get_history(session_id)
+            for msg in reversed(history):
+                if msg.get("role") == "user":
+                    content = msg.get("content", "")
+                    # Skip file-upload markers like "[📄 filename.pdf]"
+                    lines = [
+                        l for l in content.split("\n")
+                        if l.strip() and not l.strip().startswith("[📄")
+                    ]
+                    user_text = " ".join(lines).strip()
+                    if len(user_text) >= 4:
+                        lang = self.detect_language(user_text)
+                        if lang:
+                            return lang
+        except Exception:
+            pass
+
+        # 3. Try current text even if short
+        if text and text.strip():
+            lang = self.detect_language(text)
+            if lang:
+                return lang
+
+        return "nl"
 
     # ── intent ────────────────────────────────────────────────────
     async def classify_intent(self, message: str) -> str:
@@ -126,6 +175,7 @@ class AgentService:
         base = self.prompts["base_system_prompt"]
         escalation = self.prompts["escalation_prompt"]
         anti_diy = self.prompts.get("anti_diy_prompt", "")
+        formatting = self.prompts.get("formatting_prompt", "")
 
         context = ""
         if chunks:
@@ -140,7 +190,10 @@ class AgentService:
             "ru": "Отвечай на русском языке.",
             "en": "Respond in English.",
         }
-        return f"{base}\n\n{escalation}\n\n{anti_diy}\n\n{lang_map.get(language, lang_map['en'])}\n{context}"
+        return (
+            f"{base}\n\n{escalation}\n\n{anti_diy}\n\n{formatting}\n\n"
+            f"{lang_map.get(language, lang_map['en'])}\n{context}"
+        )
 
     def _check_escalation(self, intent: str, response: str) -> bool:
         if intent in {"appointment", "double_taxation", "ukrainian_business",
