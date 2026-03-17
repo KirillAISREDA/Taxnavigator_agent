@@ -22,6 +22,7 @@ async def _telegram_polling(app: FastAPI):
     """Poll Telegram for updates when webhook is not configured (no HTTPS)."""
     import httpx
     from app.services.agent_service import AgentService
+    from app.routers.telegram import _download_telegram_file, _extract_file_id, _process_file
 
     token = settings.telegram_bot_token
     base = f"https://api.telegram.org/bot{token}"
@@ -46,21 +47,39 @@ async def _telegram_polling(app: FastAPI):
                     offset = update["update_id"] + 1
                     message = update.get("message", {})
                     text = message.get("text", "")
+                    caption = message.get("caption", "")
                     chat_id = message.get("chat", {}).get("id")
 
-                    if not text or not chat_id:
+                    if not chat_id:
                         continue
 
+                    file_id = _extract_file_id(message)
+
+                    if not text and not file_id:
+                        continue
+
+                    session_id = f"tg_{chat_id}"
+
                     try:
-                        agent = AgentService(
-                            qdrant=app.state.qdrant,
-                            redis=app.state.redis,
-                        )
-                        result = await agent.process_message(
-                            message=text,
-                            session_id=f"tg_{chat_id}",
-                            channel="telegram",
-                        )
+                        if file_id:
+                            # ── photo / document ──────────────
+                            file_data, filename = await _download_telegram_file(file_id, client)
+                            result = await _process_file(
+                                file_data, filename, caption,
+                                chat_id, session_id, app.state,
+                            )
+                        else:
+                            # ── text only ─────────────────────
+                            agent = AgentService(
+                                qdrant=app.state.qdrant,
+                                redis=app.state.redis,
+                            )
+                            result = await agent.process_message(
+                                message=text,
+                                session_id=session_id,
+                                channel="telegram",
+                            )
+
                         await client.post(
                             f"{base}/sendMessage",
                             json={
@@ -69,7 +88,8 @@ async def _telegram_polling(app: FastAPI):
                                 "parse_mode": "Markdown",
                             },
                         )
-                        logger.info("Telegram polling: message processed", chat_id=chat_id)
+                        logger.info("Telegram polling: message processed",
+                                    chat_id=chat_id, has_file=bool(file_id))
                     except Exception as e:
                         logger.error("Telegram polling: message error", error=str(e))
 
