@@ -15,6 +15,9 @@ router = APIRouter()
 
 TG_BASE = f"https://api.telegram.org/bot{settings.telegram_bot_token}"
 
+# Supported extensions for document uploads
+SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf"}
+
 
 async def _download_telegram_file(file_id: str, client: httpx.AsyncClient) -> tuple[bytes, str]:
     """Download a file from Telegram by file_id. Returns (file_data, filename)."""
@@ -84,14 +87,30 @@ async def _process_file(
 
 
 def _extract_file_id(message: dict) -> str | None:
-    """Extract the best file_id from a Telegram message (photo or document)."""
+    """Extract the best file_id from a Telegram message (photo or document).
+
+    FIX: also accepts documents without mime_type by checking file extension.
+    """
+    # Photo (array of sizes — take largest)
     if message.get("photo"):
         return message["photo"][-1]["file_id"]
+
     doc = message.get("document")
     if doc:
         mime = doc.get("mime_type", "")
+        file_name = doc.get("file_name", "")
+
+        # Accept by mime type
         if mime.startswith("image/") or mime == "application/pdf":
             return doc["file_id"]
+
+        # Fallback: accept by file extension when mime_type is missing/wrong
+        from pathlib import Path
+        ext = Path(file_name).suffix.lower() if file_name else ""
+        if ext in SUPPORTED_EXTENSIONS:
+            logger.info("Accepted document by extension (no mime_type)", filename=file_name, ext=ext)
+            return doc["file_id"]
+
     return None
 
 
@@ -110,7 +129,7 @@ async def telegram_webhook(request: Request):
         caption = message.get("caption", "")
         file_id = _extract_file_id(message)
 
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=60) as client:
             if file_id:
                 # ── photo / document ──────────────────────────────
                 try:

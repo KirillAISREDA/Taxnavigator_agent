@@ -1,6 +1,7 @@
 """Document & image processing service — OCR, translation, and analysis via GPT-4o Vision."""
 
 import base64
+import io
 import structlog
 from pathlib import Path
 from openai import AsyncOpenAI
@@ -81,6 +82,22 @@ LANG_SUFFIX = {
 }
 
 
+def _extract_pdf_text(file_data: bytes) -> str:
+    """Extract text from PDF using pypdf. Returns extracted text or empty string."""
+    try:
+        import pypdf  # noqa: PLC0415
+        reader = pypdf.PdfReader(io.BytesIO(file_data))
+        pages_text = []
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                pages_text.append(text.strip())
+        return "\n\n".join(pages_text)
+    except Exception as e:
+        logger.warning("PDF text extraction failed", error=str(e))
+        return ""
+
+
 class DocumentService:
     """Handles document / image upload, OCR, translation, and analysis."""
 
@@ -105,20 +122,48 @@ class DocumentService:
         user_message: str = "",
         language: str = "nl",
     ) -> dict:
-        """Analyze uploaded document/image with GPT-4o Vision.
+        """Analyze uploaded document/image with GPT-4o.
+        - Images → GPT-4o Vision (image_url)
+        - PDFs   → text extraction → GPT-4o (text content)
         Returns {"analysis": str, "document_type": str, "needs_escalation": bool}
         """
         ext = Path(filename).suffix.lower()
-        mime = MIME_MAP.get(ext, "application/octet-stream")
-        b64 = base64.b64encode(file_data).decode()
-
         system = _PROMPT.format(user_message=user_message or "(no extra context)")
         system += LANG_SUFFIX.get(language, LANG_SUFFIX["en"])
 
-        content: list[dict] = [
-            {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}", "detail": "high"}},
-            {"type": "text", "text": user_message or "Analyze this document."},
-        ]
+        # ── Build content depending on file type ──────────────────
+        if ext in IMAGE_TYPES:
+            mime = MIME_MAP.get(ext, "image/jpeg")
+            b64 = base64.b64encode(file_data).decode()
+            content: list[dict] = [
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:{mime};base64,{b64}",
+                        "detail": "high",
+                    },
+                },
+                {
+                    "type": "text",
+                    "text": user_message or "Analyze this document.",
+                },
+            ]
+        else:
+            # PDF — extract text and send as plain text
+            pdf_text = _extract_pdf_text(file_data)
+            if not pdf_text.strip():
+                pdf_text = "[Could not extract text — the PDF may be scanned or image-based]"
+
+            content = [
+                {
+                    "type": "text",
+                    "text": (
+                        f"The client uploaded a PDF file named '{filename}'.\n\n"
+                        f"=== PDF CONTENT ===\n{pdf_text}\n=== END OF PDF ===\n\n"
+                        f"Client's question: {user_message or 'Please analyze this document.'}"
+                    ),
+                }
+            ]
 
         try:
             resp = await self.client.chat.completions.create(
