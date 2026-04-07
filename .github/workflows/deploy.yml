@@ -8,7 +8,34 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed files
+        id: changes
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "all")
+          echo "files=$CHANGED" >> $GITHUB_OUTPUT
+          if echo "$CHANGED" | grep -qE "(Dockerfile|requirements|docker-compose)"; then
+            echo "infra=true" >> $GITHUB_OUTPUT
+          else
+            echo "infra=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Sync code to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          source: "app/,crawler/,config/,Dockerfile,Dockerfile.crawler,docker-compose.yml,requirements.txt,requirements.crawler.txt,deploy.sh,webhook/"
+          target: /opt/Taxnavigator_agent
+          overwrite: true
+
+      - name: Build and restart
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -20,22 +47,15 @@ jobs:
 
             echo "=== $(date) — Deploy started ==="
 
-            # Pull latest code
-            git pull origin main
-            echo "✅ Code pulled"
-
-            # Check what changed
-            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "all")
-
             # Rebuild if infrastructure files changed
-            if echo "$CHANGED" | grep -qE "(Dockerfile|requirements|docker-compose)"; then
+            if [ "${{ steps.changes.outputs.infra }}" = "true" ]; then
               echo "📦 Infrastructure changed — full rebuild"
-              docker-compose down
-              docker-compose up -d --build
+              docker compose down
+              docker compose up -d --build
             else
               echo "♻️ Code only — rebuilding API"
-              docker-compose build api
-              docker-compose up -d --no-deps api
+              docker compose build api
+              docker compose up -d --no-deps api
             fi
 
             # Wait and health check
