@@ -50,12 +50,20 @@ jobs:
             # Rebuild if infrastructure files changed
             if [ "${{ steps.changes.outputs.infra }}" = "true" ]; then
               echo "📦 Infrastructure changed — full rebuild"
-              docker compose down
-              docker compose up -d --build
+              docker compose build --no-cache 2>/dev/null && docker compose up -d --force-recreate || {
+                echo "⚠️ Build failed (no internet?) — using docker cp fallback"
+                docker cp app/ taxnav-api:/app/app/
+                docker cp config/ taxnav-api:/app/config/
+                docker restart taxnav-api
+              }
             else
-              echo "♻️ Code only — rebuilding API"
-              docker compose build api
-              docker compose up -d --no-deps api
+              echo "♻️ Code only — updating API"
+              docker compose build api 2>/dev/null && docker compose up -d --no-deps api || {
+                echo "⚠️ Build failed — using docker cp fallback"
+                docker cp app/ taxnav-api:/app/app/
+                docker cp config/ taxnav-api:/app/config/
+                docker restart taxnav-api
+              }
             fi
 
             # Wait and health check
