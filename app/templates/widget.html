@@ -95,6 +95,9 @@
 <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf" onchange="handleFileSelect(this.files[0])">
 
 <script>
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 const API='/api/chat/',API_UP='/api/chat/upload';
 let sessionId=null,pendingFile=null;
 const $m=document.getElementById('messages'),$i=document.getElementById('input'),$s=document.getElementById('sendBtn'),$qa=document.getElementById('qa'),$bar=document.getElementById('fileBar'),$drop=document.getElementById('dropOverlay');
@@ -131,7 +134,7 @@ function addMsg(text,type,o={}){
   const d=document.createElement('div');d.className=`message ${type}`;let h='';
   if(o.fileName&&type==='user'){if(o.thumbUrl)h+=`<img class="file-thumb" src="${o.thumbUrl}">`;h+=`<span class="file-badge">📄 ${o.fileName}</span><br>`}
   if(o.docType&&type==='bot')h+=`<span class="file-badge">📄 ${o.docType}</span><br>`;
-  h+=text.replace(/\n/g,'<br>');
+  h+=escHtml(text).replace(/\n/g,'<br>');
   if(o.sources?.length&&type==='bot')h+='<div class="sources">📎 '+o.sources.filter(Boolean).map(s=>{try{return`<a href="${s}" target="_blank">${new URL(s).hostname}</a>`}catch{return''}}).join(' · ')+'</div>';
   d.innerHTML=h;$m.appendChild(d);$m.scrollTop=$m.scrollHeight;
 }

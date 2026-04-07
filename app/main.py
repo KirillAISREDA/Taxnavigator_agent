@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.settings import get_settings
 from app.services.qdrant_service import QdrantService
@@ -157,6 +158,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Security headers middleware
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        if "/widget" in str(request.url):
+            response.headers["Content-Security-Policy"] = (
+                "frame-ancestors 'self' https://taxnavigator-advice.nl https://www.taxnavigator-advice.nl"
+            )
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Static files and templates
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
