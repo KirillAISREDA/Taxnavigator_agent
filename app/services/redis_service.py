@@ -70,6 +70,12 @@ class RedisService:
             ex=SESSION_TTL,
         )
 
+    async def get_session_country(self, session_id: str) -> str | None:
+        return await self.get_session_field(session_id, "country")
+
+    async def set_session_country(self, session_id: str, country: str):
+        await self.set_session_field(session_id, "country", country)
+
     async def increment_rate(self, key: str, window: int = 60) -> int:
         """Simple rate limiter. Returns current count."""
         rkey = f"taxnav:rate:{key}"

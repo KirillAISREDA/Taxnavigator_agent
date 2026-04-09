@@ -1,8 +1,15 @@
 """Core AI Agent — intent routing, RAG retrieval, response generation.
 
 Supports two modes:
-  • "limited" (default) — client-facing bot with anti-DIY restrictions
-  • "full" — professional bot with full tax advisory capabilities
+  • "limited" — client-facing bot, NL only, with anti-DIY restrictions
+  • "full"    — professional bot, multi-country (NL/DE/IT/FR/ES), full capabilities
+
+Multi-country logic (FULL mode only):
+  • detect_country() via GPT-4o-mini — determines which country the question is about
+  • Country persisted in Redis session — no re-detection needed each message
+  • Country context injected into system prompt from countries.json
+  • Qdrant search filtered by country
+  • Language detection extended: 27 languages
 """
 
 import json
@@ -17,9 +24,27 @@ from app.services.redis_service import RedisService
 logger = structlog.get_logger()
 settings = get_settings()
 
-# Valid modes
 MODE_LIMITED = "limited"
 MODE_FULL = "full"
+
+SUPPORTED_COUNTRIES = {"nl", "de", "it", "fr", "es"}
+DEFAULT_COUNTRY = "nl"
+
+# Language → likely country (heuristic fallback, NOT authoritative)
+LANG_TO_COUNTRY_HINT = {
+    "nl": "nl", "de": "de", "it": "it", "fr": "fr", "es": "es",
+    "tr": "de",   # Most Turkish speakers in EU are in Germany
+    "pl": "de",   # Large Polish diaspora in Germany
+    "ro": "it",   # Large Romanian diaspora in Italy/Spain
+    "bg": "de",   # Bulgarian diaspora spread across DE/ES
+    "hr": "de",   # Croatian diaspora in Germany/Austria
+    "sr": "de",   # Serbian diaspora in Germany/Austria
+    "bs": "de",   # Bosnian diaspora in Germany/Austria
+    "sq": "it",   # Albanian diaspora in Italy
+    "pt": "fr",   # Portuguese diaspora in France
+    "ar": "fr",   # Maghreb Arabic diaspora in France
+    "id": "nl",   # Indonesian diaspora in Netherlands
+}
 
 
 class AgentService:
@@ -30,23 +55,43 @@ class AgentService:
         self.qdrant = qdrant
         self.redis = redis
         self._load_prompts()
+        self._load_countries()
 
     def _load_prompts(self):
         with open("config/prompts.json", "r", encoding="utf-8") as f:
             self.prompts = json.load(f)
-        with open("config/countries.json", "r", encoding="utf-8") as f:
-            self.countries = json.load(f)
 
-    # ── language ──────────────────────────────────────────────────
+    def _load_countries(self):
+        try:
+            with open("config/countries.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+                self.countries = data.get("countries", data)
+        except FileNotFoundError:
+            logger.warning("countries.json not found, using empty config")
+            self.countries = {}
+
+    # ══════════════════════════════════════════════════════════════
+    # LANGUAGE DETECTION
+    # ══════════════════════════════════════════════════════════════
+
+    SUPPORTED_LANGS = {
+        "nl", "en", "de", "fr", "it", "es", "uk", "ru",
+        "tr", "ar", "pl", "ro", "zh", "pt",
+        "hr", "sr", "bs", "bg", "sq", "bn", "ur", "pa", "hi", "tl",
+        "id",
+    }
+
+    LANG_ALIASES = {
+        "af": "nl", "ca": "es", "zh-cn": "zh", "zh-tw": "zh",
+        "mk": "bg", "fil": "tl",
+    }
+
     def detect_language(self, text: str) -> str:
         try:
             lang = detect(text)
-            if lang in ("nl", "uk", "ru", "en", "de", "fr", "it", "es"):
+            lang = self.LANG_ALIASES.get(lang, lang)
+            if lang in self.SUPPORTED_LANGS:
                 return lang
-            if lang == "af":
-                return "nl"
-            if lang == "ca":
-                return "es"
             return "en"
         except Exception:
             return "en"
@@ -54,8 +99,6 @@ class AgentService:
     async def detect_language_with_session(
         self, text: str | None, session_id: str,
     ) -> str:
-        """Detect language from text; if text is empty or too short for
-        reliable detection, infer from recent *user* messages in session."""
         if text and len(text.strip()) >= 8:
             lang = self.detect_language(text)
             if lang:
@@ -85,49 +128,59 @@ class AgentService:
 
         return "nl"
 
-    # ── country detection (full mode only) ─────────────────────
+    # ══════════════════════════════════════════════════════════════
+    # COUNTRY DETECTION (FULL MODE ONLY)
+    # ══════════════════════════════════════════════════════════════
+
     async def detect_country(self, message: str, session_id: str) -> str:
-        """Detect which country the user is asking about.
-        Check session history first, then ask GPT-4o-mini."""
-        # Check session for previously detected country
-        try:
-            stored = await self.redis.get_session_field(session_id, "country")
-            if stored and stored in self.countries:
-                return stored
-        except Exception:
-            pass
+        session_country = await self.redis.get_session_country(session_id)
+        if session_country and session_country in SUPPORTED_COUNTRIES:
+            override = await self._classify_country_gpt(message)
+            if override in SUPPORTED_COUNTRIES and override != session_country:
+                await self.redis.set_session_country(session_id, override)
+                logger.info("Country changed", old=session_country, new=override,
+                           session=session_id)
+                return override
+            return session_country
 
-        prompt = self.prompts.get("country_detection_prompt", "")
-        if not prompt:
-            return "nl"
+        detected = await self._classify_country_gpt(message)
+        if detected in SUPPORTED_COUNTRIES:
+            await self.redis.set_session_country(session_id, detected)
+            return detected
 
+        lang = self.detect_language(message)
+        hint = LANG_TO_COUNTRY_HINT.get(lang)
+        if hint and hint in SUPPORTED_COUNTRIES:
+            await self.redis.set_session_country(session_id, hint)
+            return hint
+
+        await self.redis.set_session_country(session_id, DEFAULT_COUNTRY)
+        return DEFAULT_COUNTRY
+
+    async def _classify_country_gpt(self, message: str) -> str:
         try:
             resp = await self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": prompt},
+                    {"role": "system", "content": self.prompts["country_detection_prompt"]},
                     {"role": "user", "content": message},
                 ],
-                max_tokens=5, temperature=0,
+                max_tokens=10, temperature=0,
             )
             country = resp.choices[0].message.content.strip().lower()
-            if country in self.countries:
-                await self.redis.set_session_field(session_id, "country", country)
-                logger.info("Country detected", country=country, session_id=session_id)
-                return country
+            logger.info("Country classified", country=country, message=message[:60])
+            return country
         except Exception as e:
-            logger.warning("Country detection failed", error=str(e))
-
-        return "nl"
+            logger.error("Country classification failed", error=str(e))
+            return "unknown"
 
     def _get_country_context(self, country_code: str) -> str:
-        """Build country context string from countries.json."""
         c = self.countries.get(country_code)
         if not c:
-            return ""
+            return f"Country: {country_code.upper()} (no detailed config available)"
 
         lines = [
-            f"Country: {c['name_en']} ({c['name_local']})",
+            f"Country: {c.get('name_en', country_code.upper())} ({c.get('name_local', '')})",
             f"Tax authority: {c['tax_authority']['name']} — {c['tax_authority']['website']}",
             f"Business registry: {c['business_registry']['name']} — {c['business_registry']['website']}",
             f"Income tax: {c['income_tax']['name']}",
@@ -157,7 +210,10 @@ class AgentService:
 
         return "\n".join(lines)
 
-    # ── intent ────────────────────────────────────────────────────
+    # ══════════════════════════════════════════════════════════════
+    # INTENT CLASSIFICATION
+    # ══════════════════════════════════════════════════════════════
+
     async def classify_intent(self, message: str) -> str:
         try:
             resp = await self.client.chat.completions.create(
@@ -191,7 +247,10 @@ class AgentService:
         "other":                 [],
     }
 
-    # ── full pipeline ─────────────────────────────────────────────
+    # ══════════════════════════════════════════════════════════════
+    # MAIN PIPELINE
+    # ══════════════════════════════════════════════════════════════
+
     async def process_message(
         self,
         message: str,
@@ -203,6 +262,10 @@ class AgentService:
         history = await self.redis.get_history(session_id)
         intent = await self.classify_intent(message)
 
+        country = DEFAULT_COUNTRY
+        if mode == MODE_FULL:
+            country = await self.detect_country(message, session_id)
+
         categories = self.INTENT_TO_CATEGORIES.get(intent, [])
         context_chunks = []
         if categories:
@@ -210,12 +273,9 @@ class AgentService:
                 query=message, categories=categories, limit=5,
             )
 
-        # Country detection (full mode only)
-        country = "nl"
-        if mode == MODE_FULL:
-            country = await self.detect_country(message, session_id)
-
-        system_prompt = self._build_system_prompt(language, intent, context_chunks, mode, country)
+        system_prompt = self._build_system_prompt(
+            language, intent, context_chunks, mode, country,
+        )
 
         messages = [{"role": "system", "content": system_prompt}]
         for h in history[-10:]:
@@ -236,7 +296,7 @@ class AgentService:
         logger.info("Message processed",
                     session_id=session_id, channel=channel,
                     language=language, intent=intent,
-                    escalation=needs_escalation, mode=mode)
+                    escalation=needs_escalation, mode=mode, country=country)
 
         return {
             "response": assistant_message,
@@ -244,23 +304,27 @@ class AgentService:
             "intent": intent,
             "needs_escalation": needs_escalation,
             "session_id": session_id,
+            "country": country,
             "sources": [c.get("source_url", "") for c in context_chunks if c.get("source_url")],
         }
 
-    # ── helpers ────────────────────────────────────────────────────
+    # ══════════════════════════════════════════════════════════════
+    # PROMPT BUILDER
+    # ══════════════════════════════════════════════════════════════
+
     def _build_system_prompt(
         self, language: str, intent: str, chunks: list,
-        mode: str = MODE_LIMITED, country: str = "nl",
+        mode: str = MODE_LIMITED, country: str = DEFAULT_COUNTRY,
     ) -> str:
         if mode == MODE_FULL:
-            base = self.prompts.get("base_system_prompt_full", self.prompts["base_system_prompt"])
-            # Inject country context
             country_context = self._get_country_context(country)
-            if country_context:
-                base = base.replace("{country_context}", country_context)
-            else:
-                base = base.replace("{country_context}", "")
-            escalation = self.prompts.get("escalation_prompt_full", self.prompts["escalation_prompt"])
+            base_template = self.prompts.get(
+                "base_system_prompt_full", self.prompts["base_system_prompt"],
+            )
+            base = base_template.replace("{country_context}", country_context)
+            escalation = self.prompts.get(
+                "escalation_prompt_full", self.prompts["escalation_prompt"],
+            )
             anti_diy = self.prompts.get("anti_diy_prompt_full", "")
         else:
             base = self.prompts["base_system_prompt"]
@@ -271,20 +335,40 @@ class AgentService:
 
         context = ""
         if chunks:
-            context = "\n\n## Relevante informatie uit de kennisbank:\n\n"
+            context = "\n\n## Relevant knowledge base information:\n\n"
             for i, c in enumerate(chunks, 1):
-                context += (f"### Bron {i}: {c.get('source_name','')}\n"
-                            f"URL: {c.get('source_url','')}\n{c.get('text','')}\n\n")
+                context += (
+                    f"### Source {i}: {c.get('source_name','')} "
+                    f"[{c.get('country', '').upper()}]\n"
+                    f"URL: {c.get('source_url','')}\n{c.get('text','')}\n\n"
+                )
 
         lang_map = {
             "nl": "Antwoord in het Nederlands.",
+            "en": "Respond in English.",
             "de": "Antworte auf Deutsch.",
             "fr": "Réponds en français.",
             "it": "Rispondi in italiano.",
             "es": "Responde en español.",
             "uk": "Відповідай українською мовою.",
             "ru": "Отвечай на русском языке.",
-            "en": "Respond in English.",
+            "tr": "Türkçe yanıt ver.",
+            "ar": "أجب باللغة العربية.",
+            "pl": "Odpowiedz po polsku.",
+            "ro": "Răspunde în limba română.",
+            "zh": "请用中文回答。",
+            "pt": "Responda em português.",
+            "hr": "Odgovori na hrvatskom jeziku.",
+            "sr": "Одговори на српском језику.",
+            "bs": "Odgovori na bosanskom jeziku.",
+            "bg": "Отговори на български език.",
+            "sq": "Përgjigju në shqip.",
+            "bn": "বাংলায় উত্তর দিন।",
+            "ur": "اردو میں جواب دیں۔",
+            "pa": "ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ।",
+            "hi": "हिंदी में उत्तर दें।",
+            "tl": "Sumagot sa Tagalog.",
+            "id": "Jawab dalam Bahasa Indonesia.",
         }
 
         parts = [base, escalation]
@@ -297,12 +381,17 @@ class AgentService:
 
         return "\n\n".join(parts)
 
+    # ══════════════════════════════════════════════════════════════
+    # ESCALATION CHECK
+    # ══════════════════════════════════════════════════════════════
+
     def _check_escalation(self, intent: str, response: str, mode: str = MODE_LIMITED) -> bool:
         if mode == MODE_FULL:
             if intent in {"appointment"}:
                 return True
             markers = ["advocaat", "lawyer", "juridisch geschil", "fusie",
-                        "overname", "strafrechtelijk"]
+                        "overname", "strafrechtelijk", "Rechtsanwalt",
+                        "avvocato", "avocat", "abogado"]
             return any(m in response.lower() for m in markers)
         else:
             if intent in {"appointment", "double_taxation", "ukrainian_business",
