@@ -3,6 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -46,6 +47,11 @@ jobs:
                 docker restart taxnav-api
               }
             fi
+
+            # Ensure Tailscale is running and enabled on boot
+            systemctl enable tailscaled 2>/dev/null
+            systemctl is-active tailscaled >/dev/null 2>&1 || systemctl start tailscaled
+            tailscale status >/dev/null 2>&1 && echo "✅ Tailscale OK" || echo "⚠️ Tailscale issue"
 
             # Wait and health check
             sleep 15
