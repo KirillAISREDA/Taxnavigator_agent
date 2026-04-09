@@ -37,7 +37,7 @@
       "base_url": "https://www.rvo.nl",
       "category": "subsidies",
       "language": "nl",
-      "max_pages": 100,
+      "max_pages": 300,
       "priority": 3,
       "description": "Государственные субсидии и программы"
     },
@@ -90,10 +90,9 @@
       "base_url": "https://ind.nl",
       "category": "ukrainian_status",
       "language": "nl",
-      "max_pages": 80,
+      "max_pages": 300,
       "priority": 2,
-      "allowed_paths": ["/nl/oekraine", "/en/ukraine", "/oekraine", "/ukraine"],
-      "description": "Статус украинцев, право на работу, бизнес"
+      "description": "Иммиграция, статус украинцев, право на работу, бизнес, натурализация"
     },
     {
       "id": "refugeehelp_gov",
