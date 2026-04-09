@@ -299,7 +299,8 @@
       "language": "fr",
       "max_pages": 80,
       "priority": 2,
-      "description": "Официальный guichet unique для создания, изменения и прекращения бизнеса."
+      "skip": true,
+      "description": "JS SPA — таймаут. Заменён на fr_entreprendre."
     },
     {
       "id": "fr_aides_entreprises",
@@ -310,17 +311,27 @@
       "language": "fr",
       "max_pages": 80,
       "priority": 2,
+      "start_urls": [
+        "https://www.aides-entreprises.fr/aides/all/1/all/all",
+        "https://www.aides-entreprises.fr/aides/nature/all/1/all",
+        "https://www.aides-entreprises.fr/portail"
+      ],
       "description": "Референсная база публичных финансовых мер поддержки для бизнеса."
     },
     {
       "id": "fr_service_public",
       "name": "Service-Public",
-      "base_url": "https://www.service-public.fr",
+      "base_url": "https://www.service-public.gouv.fr",
       "category": "government",
       "country": "fr",
       "language": "fr",
-      "max_pages": 80,
+      "max_pages": 100,
       "priority": 2,
+      "start_urls": [
+        "https://www.service-public.gouv.fr/particuliers/vosdroits",
+        "https://www.service-public.gouv.fr/professionnels-entreprises",
+        "https://www.service-public.gouv.fr/particuliers"
+      ],
       "description": "Официальный административный портал государства."
     },
     {
@@ -332,7 +343,8 @@
       "language": "fr",
       "max_pages": 80,
       "priority": 2,
-      "description": "Официальный доступ к законам, кодексам и нормативным актам."
+      "skip": true,
+      "description": "Cloudflare 403 — блокирует ботов. Заменён на fr_entreprendre."
     },
     {
       "id": "fr_experts_comptables",
@@ -365,7 +377,8 @@
       "language": "fr",
       "max_pages": 80,
       "priority": 2,
-      "description": "Основной официальный портал по статусам, документам и интеграции иностранцев."
+      "skip": true,
+      "description": "JS SPA — контент не доступен без JS."
     },
     {
       "id": "fr_ukraine_interieur",
@@ -399,6 +412,17 @@
       "max_pages": 80,
       "priority": 2,
       "description": "Налоговые соглашения и международные конвенции."
+    },
+    {
+      "id": "fr_entreprendre",
+      "name": "Entreprendre — Service-Public",
+      "base_url": "https://entreprendre.service-public.fr",
+      "category": "business_registration",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 100,
+      "priority": 2,
+      "description": "Портал для предпринимателей — создание, управление и закрытие бизнеса во Франции."
     },
     {
       "id": "it_agenzia_entrate",

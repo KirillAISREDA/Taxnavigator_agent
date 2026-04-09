@@ -45,7 +45,7 @@ class KnowledgeCrawler:
             timeout=30,
             follow_redirects=True,
             headers={
-                "User-Agent": "TaxNavigator-KnowledgeBot/1.0 (+https://taxnavigator-advice.nl)",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
                 "Accept-Language": "nl,en;q=0.9,uk;q=0.8,de;q=0.7,fr;q=0.6,it;q=0.5,es;q=0.4",
             },
         )
@@ -289,6 +289,9 @@ class KnowledgeCrawler:
 
         all_chunks = []
         for source in config["sources"]:
+            if source.get("skip"):
+                logger.info("Skipping source", source_id=source["id"], reason="skip=true")
+                continue
             try:
                 chunks = await self.crawl_source(source)
                 all_chunks.extend(chunks)
