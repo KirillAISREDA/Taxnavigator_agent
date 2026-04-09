@@ -167,6 +167,24 @@ async def _handle_telegram_update(
             },
         )
 
+    # Log to PostgreSQL (non-blocking)
+    try:
+        await request.app.state.db.log_interaction(
+            session_id=session_id, channel="telegram", mode=mode,
+            user_message=text or caption or f"[file]",
+            assistant_message=result.get("response", ""),
+            intent=result.get("intent"),
+            language=result.get("language", "nl"),
+            country=result.get("country", "nl"),
+            needs_escalation=result.get("needs_escalation", False),
+            sources=result.get("sources"),
+            telegram_id=chat_id,
+            telegram_name=message.get("from", {}).get("first_name"),
+            telegram_username=message.get("from", {}).get("username"),
+        )
+    except Exception:
+        pass
+
     logger.info("Telegram message processed", chat_id=chat_id,
                  has_file=bool(file_id), mode=mode)
     return Response(status_code=200)

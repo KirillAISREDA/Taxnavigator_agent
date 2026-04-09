@@ -35,6 +35,13 @@ class Settings(BaseSettings):
     # Bitrix24
     bitrix_webhook_url: str = ""
 
+    # PostgreSQL
+    postgres_host: str = "postgres"
+    postgres_port: int = 5432
+    postgres_db: str = "taxnav"
+    postgres_user: str = "taxnav"
+    postgres_password: str = "taxnav_secret"
+
     # App
     app_secret_key: str = "change-me"
     app_base_url: str = "http://localhost:8000"

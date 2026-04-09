@@ -55,6 +55,22 @@ async def chat(request: Request, body: ChatRequest):
         message=body.message, session_id=session_id,
         channel=body.channel, mode=mode,
     )
+
+    # Log to PostgreSQL (non-blocking)
+    try:
+        await request.app.state.db.log_interaction(
+            session_id=session_id, channel=body.channel, mode=mode,
+            user_message=body.message,
+            assistant_message=result.get("response", ""),
+            intent=result.get("intent"),
+            language=result.get("language", "nl"),
+            country=result.get("country", "nl"),
+            needs_escalation=result.get("needs_escalation", False),
+            sources=result.get("sources"),
+        )
+    except Exception:
+        pass
+
     return ChatResponse(**result)
 
 

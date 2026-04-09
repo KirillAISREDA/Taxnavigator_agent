@@ -20,6 +20,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
     networks:
       - taxnav-net
     mem_limit: 512m
@@ -88,9 +90,32 @@ services:
       - taxnav-net
     mem_limit: 512m
 
+  # ============================================
+  # PostgreSQL — история запросов и клиенты
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: taxnav-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=taxnav
+      - POSTGRES_USER=taxnav
+      - POSTGRES_PASSWORD=taxnav_secret
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taxnav"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - taxnav-net
+    mem_limit: 256m
+
 networks:
   taxnav-net:
     driver: bridge
 
 volumes:
   redis-data:
+  postgres-data:

@@ -18,6 +18,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.settings import get_settings
 from app.services.qdrant_service import QdrantService
 from app.services.redis_service import RedisService
+from app.services.db_service import DBService
 from app.services.agent_service import MODE_LIMITED, MODE_FULL
 from app.routers import chat, telegram, whatsapp, widget, health
 
@@ -99,6 +100,23 @@ async def _telegram_polling(app: FastAPI, bot_token: str, mode: str):
                                 "parse_mode": "Markdown",
                             },
                         )
+                        # Log to PostgreSQL (non-blocking)
+                        try:
+                            await app.state.db.log_interaction(
+                                session_id=session_id, channel="telegram", mode=mode,
+                                user_message=text or f"[file: {file_id}]",
+                                assistant_message=result.get("response", ""),
+                                intent=result.get("intent"),
+                                language=result.get("language", "nl"),
+                                country=result.get("country", "nl"),
+                                needs_escalation=result.get("needs_escalation", False),
+                                sources=result.get("sources"),
+                                telegram_id=chat_id,
+                                telegram_name=message.get("from", {}).get("first_name"),
+                                telegram_username=message.get("from", {}).get("username"),
+                            )
+                        except Exception:
+                            pass
                         logger.info(f"Telegram polling ({mode_label}): message processed",
                                     chat_id=chat_id, has_file=bool(file_id))
                     except Exception as e:
@@ -129,6 +147,9 @@ async def lifespan(app: FastAPI):
 
     app.state.redis = RedisService()
     await app.state.redis.connect()
+
+    app.state.db = DBService()
+    await app.state.db.init_db()
 
     polling_tasks = []
     poll_locks = []
@@ -178,6 +199,7 @@ async def lifespan(app: FastAPI):
     for lock in poll_locks:
         lock.close()
     await app.state.redis.disconnect()
+    await app.state.db.close()
     logger.info("TaxNavigator AI Agent shut down")
 
 
