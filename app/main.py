@@ -20,7 +20,7 @@ from app.services.qdrant_service import QdrantService
 from app.services.redis_service import RedisService
 from app.services.db_service import DBService
 from app.services.agent_service import MODE_LIMITED, MODE_FULL
-from app.routers import chat, telegram, whatsapp, widget, health
+from app.routers import chat, telegram, whatsapp, widget, health, journey
 
 logger = structlog.get_logger()
 settings = get_settings()
@@ -274,3 +274,4 @@ app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
 app.include_router(widget.router, prefix="/widget", tags=["widget"])
 app.include_router(telegram.router, prefix="/api/telegram", tags=["telegram"])
 app.include_router(whatsapp.router, prefix="/api/whatsapp", tags=["whatsapp"])
+app.include_router(journey.router, prefix="/api/journey", tags=["journey"])

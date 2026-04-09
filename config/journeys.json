@@ -1,0 +1,368 @@
+{
+  "de": {
+    "freelancer": {
+      "steps": [
+        {
+          "id": "de-f-1",
+          "title": "Anmeldung (city registration)",
+          "description": "Register your address at the local Bürgeramt within 14 days of moving in.",
+          "status": "upcoming",
+          "documents_needed": 2,
+          "estimated_time": "1 day",
+          "cost": "Free",
+          "category": "registration",
+          "icon_name": "building.2"
+        },
+        {
+          "id": "de-f-2",
+          "title": "Register your Steuernummer",
+          "description": "Fill out the Fragebogen zur steuerlichen Erfassung at your local Finanzamt.",
+          "status": "upcoming",
+          "documents_needed": 3,
+          "estimated_time": "2–4 weeks",
+          "cost": "Free",
+          "category": "tax",
+          "icon_name": "doc.text"
+        },
+        {
+          "id": "de-f-3",
+          "title": "Health insurance selection",
+          "description": "Choose between public (gesetzlich) and private (privat) health insurance.",
+          "status": "upcoming",
+          "documents_needed": 1,
+          "estimated_time": "1–2 weeks",
+          "cost": "~€200–400/mo",
+          "category": "insurance",
+          "icon_name": "cross.case"
+        },
+        {
+          "id": "de-f-4",
+          "title": "Open business bank account",
+          "description": "Required for separating business and personal finances. Many online banks available.",
+          "status": "upcoming",
+          "documents_needed": 4,
+          "estimated_time": "1–2 weeks",
+          "cost": "€0–10/mo",
+          "category": "business",
+          "icon_name": "creditcard"
+        },
+        {
+          "id": "de-f-5",
+          "title": "Register Gewerbe (trade license)",
+          "description": "Register at your local Gewerbeamt. Required for most freelance activities except Freiberufler.",
+          "status": "upcoming",
+          "documents_needed": 2,
+          "estimated_time": "1 day",
+          "cost": "€20–65",
+          "category": "business",
+          "icon_name": "storefront"
+        },
+        {
+          "id": "de-f-6",
+          "title": "Set up bookkeeping",
+          "description": "Choose a bookkeeping method (EÜR for most freelancers) and set up tools.",
+          "status": "upcoming",
+          "documents_needed": 0,
+          "estimated_time": "1 day",
+          "cost": "€0–30/mo",
+          "category": "accounting",
+          "icon_name": "chart.bar"
+        },
+        {
+          "id": "de-f-7",
+          "title": "First tax declaration",
+          "description": "Submit your annual income tax return (Einkommensteuererklärung) via ELSTER.",
+          "status": "upcoming",
+          "documents_needed": 5,
+          "estimated_time": "2–4 weeks",
+          "cost": "€0–500",
+          "category": "tax",
+          "icon_name": "doc.badge.clock"
+        }
+      ],
+      "deadlines": [
+        {
+          "id": "de-f-d1",
+          "title": "Anmeldung deadline",
+          "description": "Must register within 14 days of moving in",
+          "date": "+14d",
+          "category": "registration"
+        },
+        {
+          "id": "de-f-d2",
+          "title": "Health insurance enrollment",
+          "description": "Choose provider within first 3 months",
+          "date": "+90d",
+          "category": "insurance"
+        },
+        {
+          "id": "de-f-d3",
+          "title": "Tax declaration deadline",
+          "description": "Annual filing due July 31 (or Feb 28 with tax advisor)",
+          "date": "2026-07-31",
+          "category": "tax"
+        }
+      ]
+    },
+    "employee": {
+      "steps": [
+        {
+          "id": "de-e-1",
+          "title": "Anmeldung (city registration)",
+          "description": "Register your address at the local Bürgeramt within 14 days.",
+          "status": "upcoming",
+          "documents_needed": 2,
+          "estimated_time": "1 day",
+          "cost": "Free",
+          "category": "registration",
+          "icon_name": "building.2"
+        },
+        {
+          "id": "de-e-2",
+          "title": "Get your tax ID (Steuer-ID)",
+          "description": "Automatically sent after Anmeldung. Give it to your employer for payroll.",
+          "status": "upcoming",
+          "documents_needed": 0,
+          "estimated_time": "2–4 weeks",
+          "cost": "Free",
+          "category": "tax",
+          "icon_name": "doc.text"
+        },
+        {
+          "id": "de-e-3",
+          "title": "Health insurance registration",
+          "description": "Your employer will help register you. Choose a public provider (Krankenkasse).",
+          "status": "upcoming",
+          "documents_needed": 1,
+          "estimated_time": "1 week",
+          "cost": "~14.6% of salary (shared with employer)",
+          "category": "insurance",
+          "icon_name": "cross.case"
+        },
+        {
+          "id": "de-e-4",
+          "title": "Open a bank account",
+          "description": "Needed for salary payments. Many banks require Anmeldung first.",
+          "status": "upcoming",
+          "documents_needed": 2,
+          "estimated_time": "1 week",
+          "cost": "€0–5/mo",
+          "category": "business",
+          "icon_name": "creditcard"
+        },
+        {
+          "id": "de-e-5",
+          "title": "Annual tax declaration (optional)",
+          "description": "Not mandatory for employees, but often results in a tax refund.",
+          "status": "upcoming",
+          "documents_needed": 3,
+          "estimated_time": "1–2 weeks",
+          "cost": "Free (or €0–200 with advisor)",
+          "category": "tax",
+          "icon_name": "doc.badge.clock"
+        }
+      ],
+      "deadlines": [
+        {
+          "id": "de-e-d1",
+          "title": "Anmeldung deadline",
+          "description": "Must register within 14 days of moving in",
+          "date": "+14d",
+          "category": "registration"
+        },
+        {
+          "id": "de-e-d2",
+          "title": "Tax declaration (if filing)",
+          "description": "Due July 31 for voluntary filing",
+          "date": "2026-07-31",
+          "category": "tax"
+        }
+      ]
+    },
+    "default": {
+      "steps": [
+        {
+          "id": "de-d-1",
+          "title": "Anmeldung (city registration)",
+          "description": "Register your address at the Bürgeramt within 14 days.",
+          "status": "upcoming",
+          "documents_needed": 2,
+          "estimated_time": "1 day",
+          "cost": "Free",
+          "category": "registration",
+          "icon_name": "building.2"
+        }
+      ],
+      "deadlines": []
+    }
+  },
+  "nl": {
+    "freelancer": {
+      "steps": [
+        {
+          "id": "nl-f-1",
+          "title": "Register at municipality (gemeente)",
+          "description": "Register your address at the local gemeente within 5 days of arrival.",
+          "status": "upcoming",
+          "documents_needed": 3,
+          "estimated_time": "1 day",
+          "cost": "Free",
+          "category": "registration",
+          "icon_name": "building.2"
+        },
+        {
+          "id": "nl-f-2",
+          "title": "Get your BSN number",
+          "description": "Burgerservicenummer — issued automatically after municipality registration.",
+          "status": "upcoming",
+          "documents_needed": 0,
+          "estimated_time": "Same day",
+          "cost": "Free",
+          "category": "registration",
+          "icon_name": "person.text.rectangle"
+        },
+        {
+          "id": "nl-f-3",
+          "title": "Register at KVK (Chamber of Commerce)",
+          "description": "Register your business as eenmanszaak, VOF, or BV at the Kamer van Koophandel.",
+          "status": "upcoming",
+          "documents_needed": 2,
+          "estimated_time": "1 day",
+          "cost": "€75",
+          "category": "business_registration",
+          "icon_name": "storefront"
+        },
+        {
+          "id": "nl-f-4",
+          "title": "Get BTW number (VAT)",
+          "description": "Automatically issued by Belastingdienst after KVK registration.",
+          "status": "upcoming",
+          "documents_needed": 0,
+          "estimated_time": "2–4 weeks",
+          "cost": "Free",
+          "category": "tax",
+          "icon_name": "doc.text"
+        },
+        {
+          "id": "nl-f-5",
+          "title": "Health insurance (zorgverzekering)",
+          "description": "Mandatory basic insurance. Choose a provider within 4 months of registration.",
+          "status": "upcoming",
+          "documents_needed": 1,
+          "estimated_time": "1 day",
+          "cost": "~€130/mo",
+          "category": "insurance",
+          "icon_name": "cross.case"
+        },
+        {
+          "id": "nl-f-6",
+          "title": "Open a business bank account",
+          "description": "Separate personal and business finances.",
+          "status": "upcoming",
+          "documents_needed": 3,
+          "estimated_time": "1–2 weeks",
+          "cost": "€5–15/mo",
+          "category": "business",
+          "icon_name": "creditcard"
+        },
+        {
+          "id": "nl-f-7",
+          "title": "Set up bookkeeping",
+          "description": "Choose accounting software. Keep records for BTW and income tax.",
+          "status": "upcoming",
+          "documents_needed": 0,
+          "estimated_time": "1 day",
+          "cost": "€0–30/mo",
+          "category": "accounting",
+          "icon_name": "chart.bar"
+        }
+      ],
+      "deadlines": [
+        {
+          "id": "nl-f-d1",
+          "title": "Municipality registration",
+          "description": "Must register within 5 days of arrival",
+          "date": "+5d",
+          "category": "registration"
+        },
+        {
+          "id": "nl-f-d2",
+          "title": "Health insurance enrollment",
+          "description": "Within 4 months of BSN registration",
+          "date": "+120d",
+          "category": "insurance"
+        },
+        {
+          "id": "nl-f-d3",
+          "title": "BTW quarterly filing",
+          "description": "Quarterly VAT declaration due last day of next month",
+          "date": "2026-07-31",
+          "category": "tax"
+        },
+        {
+          "id": "nl-f-d4",
+          "title": "Income tax declaration",
+          "description": "Annual filing before May 1",
+          "date": "2027-05-01",
+          "category": "tax"
+        }
+      ]
+    },
+    "default": {
+      "steps": [
+        {
+          "id": "nl-d-1",
+          "title": "Register at municipality",
+          "description": "Register your address at the local gemeente.",
+          "status": "upcoming",
+          "documents_needed": 3,
+          "estimated_time": "1 day",
+          "cost": "Free",
+          "category": "registration",
+          "icon_name": "building.2"
+        }
+      ],
+      "deadlines": []
+    }
+  },
+  "default": {
+    "default": {
+      "steps": [
+        {
+          "id": "gen-1",
+          "title": "Register your address",
+          "description": "Register at the local municipality or city office.",
+          "status": "upcoming",
+          "documents_needed": 2,
+          "estimated_time": "1–3 days",
+          "cost": "Free",
+          "category": "registration",
+          "icon_name": "building.2"
+        },
+        {
+          "id": "gen-2",
+          "title": "Get a tax number",
+          "description": "Apply for your local tax identification number.",
+          "status": "upcoming",
+          "documents_needed": 1,
+          "estimated_time": "1–4 weeks",
+          "cost": "Free",
+          "category": "tax",
+          "icon_name": "doc.text"
+        },
+        {
+          "id": "gen-3",
+          "title": "Health insurance",
+          "description": "Enroll in mandatory health insurance.",
+          "status": "upcoming",
+          "documents_needed": 1,
+          "estimated_time": "1 week",
+          "cost": "Varies",
+          "category": "insurance",
+          "icon_name": "cross.case"
+        }
+      ],
+      "deadlines": []
+    }
+  }
+}

@@ -289,6 +289,7 @@ class AgentService:
         )
         assistant_message = resp.choices[0].message.content
         needs_escalation = self._check_escalation(intent, assistant_message, mode)
+        has_actions = self._check_has_actions(intent, assistant_message)
 
         await self.redis.add_to_history(session_id, "user", message)
         await self.redis.add_to_history(session_id, "assistant", assistant_message)
@@ -296,13 +297,15 @@ class AgentService:
         logger.info("Message processed",
                     session_id=session_id, channel=channel,
                     language=language, intent=intent,
-                    escalation=needs_escalation, mode=mode, country=country)
+                    escalation=needs_escalation, has_actions=has_actions,
+                    mode=mode, country=country)
 
         return {
             "response": assistant_message,
             "language": language,
             "intent": intent,
             "needs_escalation": needs_escalation,
+            "has_actions": has_actions,
             "session_id": session_id,
             "country": country,
             "sources": [c.get("source_url", "") for c in context_chunks if c.get("source_url")],
@@ -400,3 +403,23 @@ class AgentService:
             markers = ["afspraak", "specialist", "консультац", "запис",
                         "appointment", "consultation"]
             return any(m in response.lower() for m in markers)
+
+    def _check_has_actions(self, intent: str, response: str) -> bool:
+        """Detect if response contains actionable steps (for iOS checklist feature)."""
+        if intent in {"tax_filing", "business_registration", "ukrainian_business",
+                       "appointment", "subsidies"}:
+            return True
+
+        text_lower = response.lower()
+        action_markers = [
+            "stap 1", "stap 2", "step 1", "step 2", "schritt 1", "étape 1", "paso 1",
+            "крок 1", "шаг 1",
+            "benodigde documenten", "documents needed", "required documents",
+            "необхідні документи", "необходимые документы",
+            "deadline", "termijn", "uiterlijk", "vóór", "before", "frist",
+            "дедлайн", "термін", "срок",
+            "u moet", "you need to", "you should", "sie müssen", "vous devez", "debe",
+            "вам потрібно", "вам нужно",
+            "- [ ]", "✅", "📋",
+        ]
+        return any(marker in text_lower for marker in action_markers)

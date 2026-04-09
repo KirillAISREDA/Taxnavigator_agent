@@ -31,6 +31,17 @@ class ChatResponse(BaseModel):
     needs_escalation: bool
     sources: list[str] = []
     document_type: str | None = None
+    has_actions: bool = False
+
+
+class TranslateRequest(BaseModel):
+    text: str
+    target_language: str
+
+
+class TranslateResponse(BaseModel):
+    translated: str
+    target_language: str
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -153,6 +164,51 @@ async def chat_with_file(
         needs_escalation=doc["needs_escalation"],
         sources=sources, document_type=doc_type,
     )
+
+
+# ──────────────────────────────────────────────────────────────────
+# POST /api/chat/translate — language learning feature (iOS app)
+# ──────────────────────────────────────────────────────────────────
+@router.post("/translate", response_model=TranslateResponse)
+async def translate_message(request: Request, body: TranslateRequest):
+    """Translate text to target language. Used by iOS app for language learning."""
+    from openai import AsyncOpenAI
+    from app.settings import get_settings
+
+    settings = get_settings()
+    lang_names = {
+        "nl": "Dutch (Nederlands)", "de": "German (Deutsch)",
+        "en": "English", "uk": "Ukrainian (Українська)",
+        "ru": "Russian (Русский)", "fr": "French (Français)",
+        "es": "Spanish (Español)", "pl": "Polish (Polski)",
+        "it": "Italian (Italiano)", "pt": "Portuguese (Português)",
+        "tr": "Turkish (Türkçe)",
+    }
+    target_name = lang_names.get(body.target_language, body.target_language)
+
+    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    try:
+        resp = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        f"Translate the following text to {target_name}. "
+                        "Keep the same formatting (bold, lists, emoji). "
+                        "Only return the translation, nothing else."
+                    ),
+                },
+                {"role": "user", "content": body.text},
+            ],
+            max_tokens=1500, temperature=0.1,
+        )
+        translated = resp.choices[0].message.content
+        logger.info("Translation completed", target=body.target_language, chars=len(body.text))
+        return TranslateResponse(translated=translated, target_language=body.target_language)
+    except Exception as e:
+        logger.error("Translation failed", error=str(e))
+        return TranslateResponse(translated=body.text, target_language=body.target_language)
 
 
 # ──────────────────────────────────────────────────────────────────
