@@ -31,7 +31,10 @@ async def _telegram_polling(app: FastAPI, bot_token: str, mode: str):
     import httpx
     from app.services.agent_service import AgentService
     from app.services.document_service import DocumentService
-    from app.routers.telegram import _download_telegram_file, _extract_file_id, _process_file
+    from app.routers.telegram import (
+        _download_telegram_file, _extract_file_id, _process_file,
+        _extract_voice_file_id, _transcribe_voice,
+    )
 
     base = f"https://api.telegram.org/bot{bot_token}"
     offset = 0
@@ -64,14 +67,39 @@ async def _telegram_polling(app: FastAPI, bot_token: str, mode: str):
                         continue
 
                     file_id = _extract_file_id(message)
+                    voice_file_id = _extract_voice_file_id(message)
 
-                    if not text and not file_id:
+                    if not text and not file_id and not voice_file_id:
                         continue
 
                     session_id = f"{session_prefix}_{chat_id}"
 
                     try:
-                        if file_id:
+                        # Show "typing..." while processing
+                        await client.post(
+                            f"{base}/sendChatAction",
+                            json={"chat_id": chat_id, "action": "typing"},
+                        )
+
+                        if voice_file_id:
+                            voice_data, voice_filename = await _download_telegram_file(
+                                voice_file_id, client, bot_token,
+                            )
+                            transcription = await _transcribe_voice(voice_data, voice_filename)
+                            if not transcription:
+                                result = {"response": "🎤 Не удалось распознать голосовое сообщение. Попробуйте отправить текстом."}
+                            else:
+                                agent = AgentService(
+                                    qdrant=app.state.qdrant,
+                                    redis=app.state.redis,
+                                )
+                                result = await agent.process_message(
+                                    message=transcription,
+                                    session_id=session_id,
+                                    channel="telegram",
+                                    mode=mode,
+                                )
+                        elif file_id:
                             file_data, filename = await _download_telegram_file(
                                 file_id, client, bot_token,
                             )
@@ -102,9 +130,10 @@ async def _telegram_polling(app: FastAPI, bot_token: str, mode: str):
                         )
                         # Log to PostgreSQL (non-blocking)
                         try:
+                            user_msg = text or ("[voice]" if voice_file_id else f"[file: {file_id}]")
                             await app.state.db.log_interaction(
                                 session_id=session_id, channel="telegram", mode=mode,
-                                user_message=text or f"[file: {file_id}]",
+                                user_message=user_msg,
                                 assistant_message=result.get("response", ""),
                                 intent=result.get("intent"),
                                 language=result.get("language", "nl"),
@@ -118,7 +147,8 @@ async def _telegram_polling(app: FastAPI, bot_token: str, mode: str):
                         except Exception:
                             pass
                         logger.info(f"Telegram polling ({mode_label}): message processed",
-                                    chat_id=chat_id, has_file=bool(file_id))
+                                    chat_id=chat_id, has_file=bool(file_id),
+                                    has_voice=bool(voice_file_id))
                     except Exception as e:
                         logger.error(f"Telegram polling ({mode_label}): message error",
                                     error=str(e))

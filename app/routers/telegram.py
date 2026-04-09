@@ -5,9 +5,11 @@ Supports two bots:
   • Full bot (TELEGRAM_BOT_TOKEN_FULL) — professional with full capabilities
 """
 
+import io
 import json
 import structlog
 import httpx
+from openai import AsyncOpenAI
 from fastapi import APIRouter, Request, Response
 
 from app.services.agent_service import AgentService, MODE_LIMITED, MODE_FULL
@@ -36,6 +38,37 @@ async def _download_telegram_file(file_id: str, client: httpx.AsyncClient, bot_t
         f"https://api.telegram.org/file/bot{bot_token}/{file_path}"
     )
     return file_resp.content, filename
+
+
+async def _transcribe_voice(file_data: bytes, filename: str) -> str:
+    """Transcribe voice message using OpenAI Whisper API."""
+    openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
+
+    audio_file = io.BytesIO(file_data)
+    audio_file.name = filename or "voice.ogg"
+
+    transcript = await openai_client.audio.transcriptions.create(
+        model="whisper-1",
+        file=audio_file,
+        response_format="text",
+    )
+
+    text = transcript.strip() if isinstance(transcript, str) else transcript.text.strip()
+    logger.info("Voice transcribed", length=len(text), preview=text[:80])
+    return text
+
+
+def _extract_voice_file_id(message: dict) -> str | None:
+    """Extract file_id from voice or video_note message."""
+    voice = message.get("voice")
+    if voice:
+        return voice["file_id"]
+
+    video_note = message.get("video_note")
+    if video_note:
+        return video_note["file_id"]
+
+    return None
 
 
 async def _process_file(
@@ -130,10 +163,42 @@ async def _handle_telegram_update(
     text = message.get("text", "")
     caption = message.get("caption", "")
     file_id = _extract_file_id(message)
+    voice_file_id = _extract_voice_file_id(message)
     tg_base = f"https://api.telegram.org/bot{bot_token}"
 
     async with httpx.AsyncClient(timeout=60) as client:
-        if file_id:
+        # Show "typing..." while processing
+        await client.post(
+            f"{tg_base}/sendChatAction",
+            json={"chat_id": chat_id, "action": "typing"},
+        )
+
+        # ── 1. Voice message → transcribe → process as text ──
+        if voice_file_id:
+            try:
+                voice_data, voice_filename = await _download_telegram_file(
+                    voice_file_id, client, bot_token,
+                )
+                transcription = await _transcribe_voice(voice_data, voice_filename)
+                if not transcription:
+                    result = {"response": "🎤 Не удалось распознать голосовое сообщение. Попробуйте отправить текстом."}
+                else:
+                    agent = AgentService(
+                        qdrant=request.app.state.qdrant,
+                        redis=request.app.state.redis,
+                    )
+                    result = await agent.process_message(
+                        message=transcription,
+                        session_id=session_id,
+                        channel="telegram", mode=mode,
+                    )
+            except Exception as e:
+                logger.error("Voice transcription error", error=str(e),
+                           chat_id=chat_id, mode=mode)
+                result = {"response": "🎤 Ошибка при обработке голосового сообщения. Попробуйте ещё раз."}
+
+        # ── 2. Photo / document ──────────────────────────────
+        elif file_id:
             try:
                 file_data, filename = await _download_telegram_file(file_id, client, bot_token)
                 result = await _process_file(
@@ -146,6 +211,7 @@ async def _handle_telegram_update(
                            chat_id=chat_id, mode=mode)
                 result = {"response": "Er is een fout opgetreden bij het analyseren van het document. Probeer het opnieuw."}
 
+        # ── 3. Text message ──────────────────────────────────
         elif text:
             agent = AgentService(
                 qdrant=request.app.state.qdrant,
@@ -169,9 +235,10 @@ async def _handle_telegram_update(
 
     # Log to PostgreSQL (non-blocking)
     try:
+        user_msg = text or caption or ("[voice]" if voice_file_id else "[file]")
         await request.app.state.db.log_interaction(
             session_id=session_id, channel="telegram", mode=mode,
-            user_message=text or caption or f"[file]",
+            user_message=user_msg,
             assistant_message=result.get("response", ""),
             intent=result.get("intent"),
             language=result.get("language", "nl"),
@@ -186,7 +253,7 @@ async def _handle_telegram_update(
         pass
 
     logger.info("Telegram message processed", chat_id=chat_id,
-                 has_file=bool(file_id), mode=mode)
+                 has_file=bool(file_id), has_voice=bool(voice_file_id), mode=mode)
     return Response(status_code=200)
 
 
