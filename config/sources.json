@@ -8,7 +8,8 @@
       "language": "nl",
       "max_pages": 50,
       "priority": 1,
-      "description": "Сайт компании — услуги, цены, контакты, FAQ"
+      "description": "Сайт компании — услуги, цены, контакты, FAQ",
+      "country": "nl"
     },
     {
       "id": "belastingdienst",
@@ -18,8 +19,11 @@
       "language": "nl",
       "max_pages": 200,
       "priority": 2,
-      "allowed_paths": ["/wps/wcm/connect/bldcontentnl/belastingdienst/"],
-      "description": "Налоговая служба Нидерландов"
+      "allowed_paths": [
+        "/wps/wcm/connect/bldcontentnl/belastingdienst/"
+      ],
+      "description": "Налоговая служба Нидерландов",
+      "country": "nl"
     },
     {
       "id": "kvk",
@@ -29,7 +33,8 @@
       "language": "nl",
       "max_pages": 100,
       "priority": 2,
-      "description": "Торговая палата — регистрация компаний"
+      "description": "Торговая палата — регистрация компаний",
+      "country": "nl"
     },
     {
       "id": "rvo",
@@ -39,7 +44,8 @@
       "language": "nl",
       "max_pages": 300,
       "priority": 3,
-      "description": "Государственные субсидии и программы"
+      "description": "Государственные субсидии и программы",
+      "country": "nl"
     },
     {
       "id": "rijksoverheid",
@@ -55,8 +61,14 @@
         "https://www.rijksoverheid.nl/onderwerpen/btw",
         "https://www.rijksoverheid.nl/onderwerpen/vennootschapsbelasting"
       ],
-      "allowed_paths": ["/onderwerpen/belastingplan", "/onderwerpen/inkomstenbelasting", "/onderwerpen/btw", "/onderwerpen/vennootschapsbelasting"],
-      "description": "Налоговые ставки и законодательство"
+      "allowed_paths": [
+        "/onderwerpen/belastingplan",
+        "/onderwerpen/inkomstenbelasting",
+        "/onderwerpen/btw",
+        "/onderwerpen/vennootschapsbelasting"
+      ],
+      "description": "Налоговые ставки и законодательство",
+      "country": "nl"
     },
     {
       "id": "nba",
@@ -71,8 +83,13 @@
         "https://www.nba.nl/themas/",
         "https://www.nba.nl/over-nba/"
       ],
-      "allowed_paths": ["/wet--en-regelgeving", "/themas", "/over-nba"],
-      "description": "Профессиональная бухгалтерская информация"
+      "allowed_paths": [
+        "/wet--en-regelgeving",
+        "/themas",
+        "/over-nba"
+      ],
+      "description": "Профессиональная бухгалтерская информация",
+      "country": "nl"
     },
     {
       "id": "rjnet",
@@ -82,7 +99,8 @@
       "language": "nl",
       "max_pages": 50,
       "priority": 4,
-      "description": "Стандарты финансовой отчётности NL"
+      "description": "Стандарты финансовой отчётности NL",
+      "country": "nl"
     },
     {
       "id": "ind",
@@ -92,7 +110,8 @@
       "language": "nl",
       "max_pages": 300,
       "priority": 2,
-      "description": "Иммиграция, статус украинцев, право на работу, бизнес, натурализация"
+      "description": "Иммиграция, статус украинцев, право на работу, бизнес, натурализация",
+      "country": "nl"
     },
     {
       "id": "refugeehelp_gov",
@@ -105,8 +124,11 @@
       "start_urls": [
         "https://www.rijksoverheid.nl/onderwerpen/opvang-vluchtelingen-uit-oekraine"
       ],
-      "allowed_paths": ["/onderwerpen/opvang-vluchtelingen-uit-oekraine"],
-      "description": "Поддержка и ресурсы для украинцев в Нидерландах (гос. портал)"
+      "allowed_paths": [
+        "/onderwerpen/opvang-vluchtelingen-uit-oekraine"
+      ],
+      "description": "Поддержка и ресурсы для украинцев в Нидерландах (гос. портал)",
+      "country": "nl"
     },
     {
       "id": "belastingdienst_intl",
@@ -119,20 +141,626 @@
       "start_urls": [
         "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/internationaal"
       ],
-      "allowed_paths": ["/wps/wcm/connect/bldcontentnl/belastingdienst/prive/internationaal"],
-      "description": "Двойное налогообложение, международные налоговые ситуации NL-UA"
+      "allowed_paths": [
+        "/wps/wcm/connect/bldcontentnl/belastingdienst/prive/internationaal"
+      ],
+      "description": "Двойное налогообложение, международные налоговые ситуации NL-UA",
+      "country": "nl"
+    },
+    {
+      "id": "de_elster",
+      "name": "ELSTER",
+      "base_url": "https://www.elster.de/eportal/start",
+      "category": "tax",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Налоги и электронная подача деклараций; по вопросам Einkommensteuer обычно компетентен местный Finanzamt."
+    },
+    {
+      "id": "de_handelsregister",
+      "name": "Handelsregister",
+      "base_url": "https://www.handelsregister.de",
+      "category": "business_registration",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный реестровый портал земель; ближайший аналог торгового реестра/регистрации бизнеса."
+    },
+    {
+      "id": "de_unternehmensregister",
+      "name": "Unternehmensregister",
+      "base_url": "https://www.unternehmensregister.de/en",
+      "category": "business_registration",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Центральная платформа корпоративных данных; полезна как дополняющий официальный реестр бизнеса."
+    },
+    {
+      "id": "de_foerderdatenbank",
+      "name": "Förderdatenbank",
+      "base_url": "https://www.foerderdatenbank.de/FDB/DE/Home/home.html",
+      "category": "subsidies",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Федеральная база программ поддержки Bund, Länder и EU."
+    },
+    {
+      "id": "de_bundesportal",
+      "name": "Bundesportal",
+      "base_url": "https://verwaltung.bund.de/portal/EN/unternehmen",
+      "category": "government",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Госпортал с услугами и административной информацией для бизнеса."
+    },
+    {
+      "id": "de_gesetze_im_internet",
+      "name": "Gesetze im Internet",
+      "base_url": "https://www.gesetze-im-internet.de",
+      "category": "legislation",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный доступ к действующему федеральному законодательству."
+    },
+    {
+      "id": "de_wpk",
+      "name": "WPK",
+      "base_url": "https://www.wpk.de/english",
+      "category": "accounting",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Публично-правовая палата аудиторов и sworn auditors."
+    },
+    {
+      "id": "de_drsc",
+      "name": "DRSC / ASCG",
+      "base_url": "https://www.drsc.de/en",
+      "category": "reporting_standards",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Национальный standard-setter по бухгалтерским стандартам."
+    },
+    {
+      "id": "de_bamf",
+      "name": "BAMF",
+      "base_url": "https://www.bamf.de/EN/Startseite/startseite_node.html",
+      "category": "immigration",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный федеральный источник по миграции, убежищу и интеграции."
+    },
+    {
+      "id": "de_germany4ukraine",
+      "name": "Germany4Ukraine",
+      "base_url": "https://www.germany4ukraine.de/EN/startseite_node.html",
+      "category": "ukrainian_support",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный федеральный портал для людей из Украины."
+    },
+    {
+      "id": "de_bzst_international",
+      "name": "BZSt — EU & International",
+      "base_url": "https://www.bzst.de/DE/Unternehmen/EUInternational/euinternational_node.html",
+      "category": "double_taxation",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Международные налоги, EU/international tax topics и трансграничные налоговые вопросы."
+    },
+    {
+      "id": "de_bmf_double_taxation",
+      "name": "BMF — Double taxation",
+      "base_url": "https://www.bundesfinanzministerium.de/Web/EN/Issues/Taxation/Double-taxation/double-taxation.html",
+      "category": "double_taxation",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Соглашения об избежании двойного налогообложения и международное налогообложение."
+    },
+    {
+      "id": "fr_impots",
+      "name": "impots.gouv.fr",
+      "base_url": "https://www.impots.gouv.fr/accueil",
+      "category": "tax",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Основной официальный налоговый портал DGFiP."
+    },
+    {
+      "id": "fr_formalites_entreprises",
+      "name": "Formalités d’entreprises",
+      "base_url": "https://formalites.entreprises.gouv.fr",
+      "category": "business_registration",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный guichet unique для создания, изменения и прекращения бизнеса."
+    },
+    {
+      "id": "fr_aides_entreprises",
+      "name": "aides-entreprises.fr",
+      "base_url": "https://www.aides-entreprises.fr",
+      "category": "subsidies",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Референсная база публичных финансовых мер поддержки для бизнеса."
+    },
+    {
+      "id": "fr_service_public",
+      "name": "Service-Public",
+      "base_url": "https://www.service-public.fr",
+      "category": "government",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный административный портал государства."
+    },
+    {
+      "id": "fr_legifrance",
+      "name": "Légifrance",
+      "base_url": "https://www.legifrance.gouv.fr",
+      "category": "legislation",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный доступ к законам, кодексам и нормативным актам."
+    },
+    {
+      "id": "fr_experts_comptables",
+      "name": "Ordre des experts-comptables",
+      "base_url": "https://www.experts-comptables.org",
+      "category": "accounting",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Профессиональный ordre для experts-comptables."
+    },
+    {
+      "id": "fr_anc",
+      "name": "ANC",
+      "base_url": "https://www.anc.gouv.fr",
+      "category": "reporting_standards",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Autorité des normes comptables; официальный французский standard-setter."
+    },
+    {
+      "id": "fr_etrangers_en_france",
+      "name": "Portail des étrangers en France",
+      "base_url": "https://etrangers-en-france.interieur.gouv.fr",
+      "category": "immigration",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Основной официальный портал по статусам, документам и интеграции иностранцев."
+    },
+    {
+      "id": "fr_ukraine_interieur",
+      "name": "Protection temporaire — Ministère de l’Intérieur",
+      "base_url": "https://www.interieur.gouv.fr/actualites/grands-dossiers/situation-en-ukraine/information-a-destination-des-personnes-deplacees",
+      "category": "ukrainian_support",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный источник по временной защите для людей, прибывших из Украины."
+    },
+    {
+      "id": "fr_impots_international",
+      "name": "impots.gouv.fr — International",
+      "base_url": "https://www.impots.gouv.fr/international",
+      "category": "double_taxation",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Международное налогообложение, non-residents и трансграничные налоговые вопросы."
+    },
+    {
+      "id": "fr_conventions_internationales",
+      "name": "Les conventions internationales",
+      "base_url": "https://www.impots.gouv.fr/les-conventions-internationales",
+      "category": "double_taxation",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Налоговые соглашения и международные конвенции."
+    },
+    {
+      "id": "it_agenzia_entrate",
+      "name": "Agenzia delle Entrate",
+      "base_url": "https://www.agenziaentrate.gov.it/portale/home",
+      "category": "tax",
+      "country": "it",
+      "language": "it",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Основной официальный налоговый портал; включает сервисы и информацию для иностранных налогоплательщиков."
+    },
+    {
+      "id": "it_registro_imprese",
+      "name": "Registro Imprese",
+      "base_url": "https://www.registroimprese.it",
+      "category": "business_registration",
+      "country": "it",
+      "language": "it",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный реестр компаний при системе торговых палат."
+    },
+    {
+      "id": "it_incentivi",
+      "name": "Incentivi.gov.it",
+      "base_url": "https://www.incentivi.gov.it/it",
+      "category": "subsidies",
+      "country": "it",
+      "language": "it",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный каталог стимулов и субсидий от публичных администраций."
+    },
+    {
+      "id": "it_normattiva",
+      "name": "Normattiva",
+      "base_url": "https://www.normattiva.it",
+      "category": "legislation",
+      "country": "it",
+      "language": "it",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный портал законодательства; связан с доступом к Gazzetta Ufficiale."
+    },
+    {
+      "id": "it_cndcec",
+      "name": "CNDCEC",
+      "base_url": "https://commercialisti.it",
+      "category": "accounting",
+      "country": "it",
+      "language": "it",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Национальный совет dottori commercialisti ed esperti contabili."
+    },
+    {
+      "id": "it_oic",
+      "name": "OIC",
+      "base_url": "https://www.fondazioneoic.eu",
+      "category": "reporting_standards",
+      "country": "it",
+      "language": "it",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Итальянский standard-setter по бухгалтерским стандартам."
+    },
+    {
+      "id": "it_portale_immigrazione",
+      "name": "Portale Immigrazione",
+      "base_url": "https://www.portaleimmigrazione.it/ITA/index.html",
+      "category": "immigration",
+      "country": "it",
+      "language": "it",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный портал по permessi и carte di soggiorno."
+    },
+    {
+      "id": "it_protezione_civile_ukraine",
+      "name": "Protezione Civile — Protezione temporanea",
+      "base_url": "https://www.protezionecivile.gov.it/it/pagina-base/protezione-temporanea-italia-lopuscolo-informativo-0",
+      "category": "ukrainian_support",
+      "country": "it",
+      "language": "it",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный блок по временной защите и поддержке людей из Украины."
+    },
+    {
+      "id": "it_convenzioni_doppie_imposizioni",
+      "name": "Agenzia delle Entrate — Convenzioni contro le doppie imposizioni",
+      "base_url": "https://www.agenziaentrate.gov.it/portale/schede/rimborsi/convenzioni-contro-le-doppie-imposizioni/soggetti-non-residenti-in-italia",
+      "category": "double_taxation",
+      "country": "it",
+      "language": "it",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Non-residents и применение treaty relief по соглашениям об избежании двойного налогообложения."
+    },
+    {
+      "id": "es_aeat",
+      "name": "Agencia Tributaria",
+      "base_url": "https://sede.agenciatributaria.gob.es",
+      "category": "tax",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальная налоговая sede для деклараций, платежей и сервисов."
+    },
+    {
+      "id": "es_circe",
+      "name": "CIRCE",
+      "base_url": "https://administracion.gob.es/pag_Home/Tramites/miEmpresaEnTramites/Iniciativas/CIRCE.html",
+      "category": "business_registration",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный one-stop сервис для создания и закрытия бизнеса."
+    },
+    {
+      "id": "es_borme",
+      "name": "BORME",
+      "base_url": "https://www.boe.es/diario_borme",
+      "category": "business_registration",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальные публикации по mercantile registry; полезный официальный источник по корпоративным событиям."
+    },
+    {
+      "id": "es_bdns",
+      "name": "SNPSAP / BDNS",
+      "base_url": "https://www.pap.hacienda.gob.es/bdnstrans/es/index",
+      "category": "subsidies",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный портал публикации субсидий, ayudas de minimis и других мер поддержки."
+    },
+    {
+      "id": "es_administracion_gob",
+      "name": "Punto de Acceso General",
+      "base_url": "https://administracion.gob.es",
+      "category": "government",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Единая точка входа в госадминистрацию и госуслуги."
+    },
+    {
+      "id": "es_boe",
+      "name": "BOE",
+      "base_url": "https://boe.es",
+      "category": "legislation",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный вестник и законодательный портал."
+    },
+    {
+      "id": "es_roac",
+      "name": "ROAC",
+      "base_url": "https://www.icac.gob.es/servicios-roac",
+      "category": "accounting",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный реестр аудиторов и аудиторских фирм."
+    },
+    {
+      "id": "es_icac",
+      "name": "ICAC",
+      "base_url": "https://www.icac.gob.es",
+      "category": "reporting_standards",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Госорган по нормированию бухгалтерского учёта и аудиту."
+    },
+    {
+      "id": "es_migraciones_autorizaciones",
+      "name": "Migraciones — Autorizaciones",
+      "base_url": "https://www.inclusion.gob.es/web/migraciones/autorizaciones",
+      "category": "immigration",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный источник по разрешениям на проживание и работу."
+    },
+    {
+      "id": "es_sede_extranjeria",
+      "name": "Sede Extranjería",
+      "base_url": "https://sede.inclusion.gob.es/extranjeria",
+      "category": "immigration",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальная sede для extranjería-процедур и связанных сервисов."
+    },
+    {
+      "id": "es_ucrania_urgente",
+      "name": "Ucrania Urgente",
+      "base_url": "https://ucraniaurgente.inclusion.gob.es",
+      "category": "ukrainian_support",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальный пакет информации и сервисов для людей, прибывших из Украины."
+    },
+    {
+      "id": "es_proteccion_temporal",
+      "name": "Protección temporal — Interior",
+      "base_url": "https://proteccion-asilo.interior.gob.es/es/proteccion-temporal/que-es-la-proteccion-temporal/index.html",
+      "category": "ukrainian_support",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Официальная информация о режиме временной защиты."
+    },
+    {
+      "id": "es_aeat_no_residentes",
+      "name": "AEAT — No residentes",
+      "base_url": "https://sede.agenciatributaria.gob.es/Sede/no-residentes.html",
+      "category": "double_taxation",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Налоги для non-residents и международные налоговые вопросы."
+    },
+    {
+      "id": "es_convenios_doble_imposicion",
+      "name": "Convenios de doble imposición",
+      "base_url": "https://sede.agenciatributaria.gob.es/Sede/normativa-criterios-interpretativos/fiscalidad-internacional/convenios-doble-imposicion-firmados-espana.html",
+      "category": "double_taxation",
+      "country": "es",
+      "language": "es",
+      "max_pages": 80,
+      "priority": 2,
+      "description": "Соглашения об избежании двойного налогообложения, подписанные Испанией."
+    },
+    {
+      "id": "de_ihk",
+      "name": "IHK — Industrie- und Handelskammer",
+      "base_url": "https://www.ihk.de",
+      "category": "business_registration",
+      "country": "de",
+      "language": "de",
+      "max_pages": 80,
+      "priority": 3,
+      "description": "Торгово-промышленная палата — регистрация Gewerbe, консультации для предпринимателей"
+    },
+    {
+      "id": "de_bstbk",
+      "name": "Bundessteuerberaterkammer",
+      "base_url": "https://www.bstbk.de",
+      "category": "accounting",
+      "country": "de",
+      "language": "de",
+      "max_pages": 50,
+      "priority": 3,
+      "description": "Федеральная палата налоговых консультантов Германии"
+    },
+    {
+      "id": "fr_urssaf_auto",
+      "name": "URSSAF — Auto-entrepreneur",
+      "base_url": "https://www.autoentrepreneur.urssaf.fr",
+      "category": "business_registration",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 60,
+      "priority": 2,
+      "description": "Регистрация и управление micro-entreprise / auto-entrepreneur"
+    },
+    {
+      "id": "fr_bpifrance",
+      "name": "Bpifrance",
+      "base_url": "https://www.bpifrance.fr",
+      "category": "subsidies",
+      "country": "fr",
+      "language": "fr",
+      "max_pages": 80,
+      "priority": 3,
+      "description": "Банк и программы финансирования для предпринимателей"
+    },
+    {
+      "id": "it_unioncamere",
+      "name": "Unioncamere",
+      "base_url": "https://www.unioncamere.gov.it",
+      "category": "business_registration",
+      "country": "it",
+      "language": "it",
+      "max_pages": 50,
+      "priority": 3,
+      "description": "Союз торговых палат Италии — регистрация и поддержка бизнеса"
+    },
+    {
+      "id": "it_invitalia",
+      "name": "Invitalia",
+      "base_url": "https://www.invitalia.it",
+      "category": "subsidies",
+      "country": "it",
+      "language": "it",
+      "max_pages": 80,
+      "priority": 3,
+      "description": "Национальное агентство по привлечению инвестиций и развитию бизнеса"
+    },
+    {
+      "id": "es_ipyme",
+      "name": "IPYME — Portal PYME",
+      "base_url": "https://www.ipyme.org",
+      "category": "business_registration",
+      "country": "es",
+      "language": "es",
+      "max_pages": 60,
+      "priority": 3,
+      "description": "Портал для малого и среднего бизнеса Испании"
+    },
+    {
+      "id": "es_enisa",
+      "name": "ENISA",
+      "base_url": "https://www.enisa.es",
+      "category": "subsidies",
+      "country": "es",
+      "language": "es",
+      "max_pages": 50,
+      "priority": 3,
+      "description": "Финансирование для стартапов и предпринимателей"
     }
+  ],
+  "supported_countries": [
+    "nl",
+    "de",
+    "it",
+    "fr",
+    "es"
   ],
   "categories": {
     "company": "Информация о TaxNavigator & Advice B.V.",
-    "tax": "Налоги в Нидерландах (BTW, IB, Vpb, dividendbelasting)",
-    "business_registration": "Регистрация бизнеса (KVK, eenmanszaak, BV, VOF)",
+    "tax": "Налоги (BTW/USt/IVA/TVA, подоходный, корпоративный)",
+    "business_registration": "Регистрация бизнеса",
     "subsidies": "Государственные субсидии и программы поддержки",
-    "legislation": "Налоговое законодательство и ставки",
-    "accounting": "Бухгалтерский учёт и стандарты",
-    "reporting_standards": "Стандарты финансовой отчётности (Dutch GAAP)",
-    "ukrainian_status": "Статус украинцев в NL (вид на жительство, работа, бизнес)",
+    "legislation": "Налоговое законодательство",
+    "accounting": "Бухгалтерский учёт",
+    "reporting_standards": "Стандарты финансовой отчётности",
+    "immigration": "Иммиграция и ВНЖ",
+    "ukrainian_status": "Статус украинцев (ВНЖ, работа, бизнес)",
     "ukrainian_support": "Поддержка и ресурсы для украинцев",
-    "double_taxation": "Двойное налогообложение Украина-NL"
+    "double_taxation": "Двойное налогообложение",
+    "government": "Государственные порталы и услуги"
   }
 }

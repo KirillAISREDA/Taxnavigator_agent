@@ -57,6 +57,19 @@ class RedisService:
     async def clear_history(self, session_id: str):
         await self.redis.delete(self._key(session_id))
 
+    async def get_session_field(self, session_id: str, field: str) -> str | None:
+        """Get a single field from session metadata."""
+        val = await self.redis.get(f"taxnav:meta:{session_id}:{field}")
+        return val
+
+    async def set_session_field(self, session_id: str, field: str, value: str):
+        """Set a single field in session metadata."""
+        await self.redis.set(
+            f"taxnav:meta:{session_id}:{field}",
+            value,
+            ex=SESSION_TTL,
+        )
+
     async def increment_rate(self, key: str, window: int = 60) -> int:
         """Simple rate limiter. Returns current count."""
         rkey = f"taxnav:rate:{key}"

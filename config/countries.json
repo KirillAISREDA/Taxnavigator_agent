@@ -1,0 +1,260 @@
+{
+  "nl": {
+    "name_en": "Netherlands",
+    "name_local": "Nederland",
+    "currency": "EUR",
+    "tax_year": "January 1 – December 31",
+    "tax_authority": {
+      "name": "Belastingdienst",
+      "website": "https://www.belastingdienst.nl"
+    },
+    "business_registry": {
+      "name": "Kamer van Koophandel (KVK)",
+      "website": "https://www.kvk.nl"
+    },
+    "income_tax": {
+      "name": "Inkomstenbelasting (IB)",
+      "rates": [
+        { "bracket": "Up to €75,518", "rate": "36.97%" },
+        { "bracket": "Above €75,518", "rate": "49.50%" }
+      ],
+      "filing_deadline": "May 1 (following year)"
+    },
+    "corporate_tax": {
+      "name": "Vennootschapsbelasting (Vpb)",
+      "standard_rate": "25.8%",
+      "reduced_rate": "19% on first €200,000"
+    },
+    "vat": {
+      "name": "Belasting over de toegevoegde waarde (BTW)",
+      "standard_rate": "21%",
+      "reduced_rates": ["9%"]
+    },
+    "business_forms": [
+      { "local_name": "Eenmanszaak", "description": "Sole proprietorship, simplest form, owner fully liable" },
+      { "local_name": "Vennootschap onder firma (VOF)", "description": "General partnership, partners jointly liable" },
+      { "local_name": "Besloten vennootschap (BV)", "description": "Private limited company, most common corporate form" },
+      { "local_name": "Stichting", "description": "Foundation, no shareholders, used for non-profit or holding structures" }
+    ],
+    "social_security": "Employer pays ~18% for social insurance (WW, WIA, ZW). Employee contributions via income tax (AOW, Anw, Wlz). Health insurance (Zvw) is mandatory private, ~€130/month plus employer contribution of 6.68%.",
+    "immigration_portal": {
+      "name": "Immigratie- en Naturalisatiedienst (IND)",
+      "url": "https://ind.nl"
+    },
+    "ukraine_support_portal": {
+      "name": "RefugeeHelp",
+      "url": "https://www.refugeehelp.nl"
+    },
+    "double_taxation_treaties_url": "https://www.belastingdienst.nl/wps/wcm/connect/nl/internationaal/content/verdragen-voor-het-voorkomen-van-dubbele-belasting"
+  },
+  "de": {
+    "name_en": "Germany",
+    "name_local": "Deutschland",
+    "currency": "EUR",
+    "tax_year": "January 1 – December 31",
+    "tax_authority": {
+      "name": "Bundeszentralamt für Steuern (BZSt)",
+      "website": "https://www.bzst.de"
+    },
+    "business_registry": {
+      "name": "Handelsregister (via Gewerbeamt for trade registration)",
+      "website": "https://www.handelsregister.de"
+    },
+    "income_tax": {
+      "name": "Einkommensteuer (ESt)",
+      "rates": [
+        { "bracket": "Up to €11,604", "rate": "0%" },
+        { "bracket": "€11,605 – €17,005", "rate": "14% – 24% (progressive)" },
+        { "bracket": "€17,006 – €66,760", "rate": "24% – 42% (progressive)" },
+        { "bracket": "€66,761 – €277,825", "rate": "42%" },
+        { "bracket": "Above €277,825", "rate": "45%" }
+      ],
+      "note": "Plus Solidaritätszuschlag (Soli) of 5.5% on tax owed (exempted for most taxpayers since 2021)",
+      "filing_deadline": "September 2 (following year, with tax advisor: June following+1 year)"
+    },
+    "corporate_tax": {
+      "name": "Körperschaftsteuer (KSt)",
+      "standard_rate": "15% + 5.5% Soli = 15.825%",
+      "note": "Plus Gewerbesteuer (trade tax) averaging ~14%, total effective ~30%"
+    },
+    "vat": {
+      "name": "Umsatzsteuer (USt)",
+      "standard_rate": "19%",
+      "reduced_rates": ["7%"]
+    },
+    "business_forms": [
+      { "local_name": "Einzelunternehmen", "description": "Sole proprietorship, requires Gewerbeanmeldung" },
+      { "local_name": "Gesellschaft bürgerlichen Rechts (GbR)", "description": "Civil law partnership, simple partnership form" },
+      { "local_name": "Gesellschaft mit beschränkter Haftung (GmbH)", "description": "Limited liability company, €25,000 minimum capital" },
+      { "local_name": "Unternehmergesellschaft (UG)", "description": "Mini-GmbH, from €1 capital, must build reserves" },
+      { "local_name": "Aktiengesellschaft (AG)", "description": "Public limited company, €50,000 minimum capital" }
+    ],
+    "social_security": "Split roughly 50/50 between employer and employee. Total ~40% of gross salary: health insurance ~14.6%, pension ~18.6%, unemployment ~2.6%, long-term care ~3.4%. Capped at income ceilings (Beitragsbemessungsgrenze).",
+    "immigration_portal": {
+      "name": "Bundesamt für Migration und Flüchtlinge (BAMF)",
+      "url": "https://www.bamf.de"
+    },
+    "ukraine_support_portal": {
+      "name": "Germany4Ukraine",
+      "url": "https://www.germany4ukraine.de"
+    },
+    "double_taxation_treaties_url": "https://www.bundesfinanzministerium.de/Web/DE/Themen/Steuern/Internationales_Steuerrecht/Staatenbezogene_Informationen/staatenbezogene_info.html"
+  },
+  "fr": {
+    "name_en": "France",
+    "name_local": "France",
+    "currency": "EUR",
+    "tax_year": "January 1 – December 31",
+    "tax_authority": {
+      "name": "Direction générale des finances publiques (DGFiP)",
+      "website": "https://www.impots.gouv.fr"
+    },
+    "business_registry": {
+      "name": "Registre du Commerce et des Sociétés (RCS) / Guichet unique INPI",
+      "website": "https://www.inpi.fr/guichet-unique"
+    },
+    "income_tax": {
+      "name": "Impôt sur le revenu (IR)",
+      "rates": [
+        { "bracket": "Up to €11,294", "rate": "0%" },
+        { "bracket": "€11,295 – €28,797", "rate": "11%" },
+        { "bracket": "€28,798 – €82,341", "rate": "30%" },
+        { "bracket": "€82,342 – €177,106", "rate": "41%" },
+        { "bracket": "Above €177,106", "rate": "45%" }
+      ],
+      "note": "Rates apply per quotient familial (household shares). Additional 3% on income above €250k (4% above €500k).",
+      "filing_deadline": "May–June (exact date depends on département and filing method)"
+    },
+    "corporate_tax": {
+      "name": "Impôt sur les sociétés (IS)",
+      "standard_rate": "25%",
+      "reduced_rate": "15% on first €42,500 for small enterprises (CA < €10M)"
+    },
+    "vat": {
+      "name": "Taxe sur la valeur ajoutée (TVA)",
+      "standard_rate": "20%",
+      "reduced_rates": ["10%", "5.5%", "2.1%"]
+    },
+    "business_forms": [
+      { "local_name": "Auto-entrepreneur / Micro-entreprise", "description": "Simplified sole trader regime with turnover caps and flat-rate charges" },
+      { "local_name": "Entreprise individuelle (EI)", "description": "Sole proprietorship, personal assets now protected by default since 2022" },
+      { "local_name": "Société à responsabilité limitée (SARL)", "description": "Limited liability company, 2–100 partners" },
+      { "local_name": "Société par actions simplifiée (SAS)", "description": "Flexible joint-stock company, most popular corporate form for startups" },
+      { "local_name": "Société anonyme (SA)", "description": "Public limited company, €37,000 minimum capital" }
+    ],
+    "social_security": "Managed by URSSAF. Employee social charges ~22% of gross, employer charges ~25–42% of gross. Covers health (Assurance Maladie), pension (retraite), family allowances (CAF), unemployment (Pôle emploi). Auto-entrepreneurs pay simplified flat-rate contributions (~12.3–21.2% of turnover).",
+    "immigration_portal": {
+      "name": "Office français de l'immigration et de l'intégration (OFII)",
+      "url": "https://www.ofii.fr"
+    },
+    "ukraine_support_portal": {
+      "name": "Pour l'Ukraine (Government portal)",
+      "url": "https://parrainage.refugies.info"
+    },
+    "double_taxation_treaties_url": "https://www.impots.gouv.fr/international-professionnel/les-conventions-internationales"
+  },
+  "it": {
+    "name_en": "Italy",
+    "name_local": "Italia",
+    "currency": "EUR",
+    "tax_year": "January 1 – December 31",
+    "tax_authority": {
+      "name": "Agenzia delle Entrate",
+      "website": "https://www.agenziaentrate.gov.it"
+    },
+    "business_registry": {
+      "name": "Registro delle Imprese (via Camere di Commercio)",
+      "website": "https://www.registroimprese.it"
+    },
+    "income_tax": {
+      "name": "Imposta sul reddito delle persone fisiche (IRPEF)",
+      "rates": [
+        { "bracket": "Up to €28,000", "rate": "23%" },
+        { "bracket": "€28,001 – €50,000", "rate": "35%" },
+        { "bracket": "Above €50,000", "rate": "43%" }
+      ],
+      "note": "Regional (IRPEF regionale, ~1.2–3.3%) and municipal surcharges (addizionale comunale, ~0–0.9%) apply on top.",
+      "filing_deadline": "October 31 (Modello Redditi online) or September 30 (Modello 730 via employer/CAF)"
+    },
+    "corporate_tax": {
+      "name": "Imposta sul reddito delle società (IRES)",
+      "standard_rate": "24%",
+      "note": "Plus IRAP (Imposta regionale sulle attività produttive) at 3.9% standard rate"
+    },
+    "vat": {
+      "name": "Imposta sul valore aggiunto (IVA)",
+      "standard_rate": "22%",
+      "reduced_rates": ["10%", "5%", "4%"]
+    },
+    "business_forms": [
+      { "local_name": "Ditta individuale", "description": "Sole proprietorship, owner personally liable" },
+      { "local_name": "Società a responsabilità limitata (SRL)", "description": "Limited liability company, most common corporate form" },
+      { "local_name": "Società a responsabilità limitata semplificata (SRLS)", "description": "Simplified SRL, €1 minimum capital, reduced setup costs" },
+      { "local_name": "Società per azioni (SPA)", "description": "Joint-stock company, €50,000 minimum capital" },
+      { "local_name": "Società in accomandita semplice (SAS)", "description": "Limited partnership with general and limited partners" }
+    ],
+    "social_security": "Managed by INPS. Employees: employer pays ~30%, employee ~9.2% of gross salary. Self-employed (Gestione Separata): ~26.07%. Artisans/traders: ~24% on income. Covers pension, sickness, maternity, unemployment (NASpI). Regime forfettario (flat-tax regime at 15% / 5% for new) available for small businesses under €85,000 turnover.",
+    "immigration_portal": {
+      "name": "Portale Immigrazione (Ministero dell'Interno)",
+      "url": "https://www.portaleimmigrazione.it"
+    },
+    "ukraine_support_portal": {
+      "name": "Protezione temporanea Ucraina (Governo Italiano)",
+      "url": "https://www.interno.gov.it/it/info-profughi-ucraini"
+    },
+    "double_taxation_treaties_url": "https://www.finanze.gov.it/it/fiscalita-dellunione-europea-e-internazionale/convenzioni-e-accordi/convenzioni-per-evitare-le-doppie-imposizioni/"
+  },
+  "es": {
+    "name_en": "Spain",
+    "name_local": "España",
+    "currency": "EUR",
+    "tax_year": "January 1 – December 31",
+    "tax_authority": {
+      "name": "Agencia Estatal de Administración Tributaria (AEAT)",
+      "website": "https://sede.agenciatributaria.gob.es"
+    },
+    "business_registry": {
+      "name": "Registro Mercantil Central",
+      "website": "https://www.rmc.es"
+    },
+    "income_tax": {
+      "name": "Impuesto sobre la Renta de las Personas Físicas (IRPF)",
+      "rates": [
+        { "bracket": "Up to €12,450", "rate": "19%" },
+        { "bracket": "€12,451 – €20,200", "rate": "24%" },
+        { "bracket": "€20,201 – €35,200", "rate": "30%" },
+        { "bracket": "€35,201 – €60,000", "rate": "37%" },
+        { "bracket": "€60,001 – €300,000", "rate": "45%" },
+        { "bracket": "Above €300,000", "rate": "47%" }
+      ],
+      "note": "Combined state + regional rates. Autonomous communities may adjust their share.",
+      "filing_deadline": "June 30 (following year)"
+    },
+    "corporate_tax": {
+      "name": "Impuesto sobre Sociedades (IS)",
+      "standard_rate": "25%",
+      "reduced_rate": "15% for newly created companies (first two profitable years)"
+    },
+    "vat": {
+      "name": "Impuesto sobre el Valor Añadido (IVA)",
+      "standard_rate": "21%",
+      "reduced_rates": ["10%", "4%"]
+    },
+    "business_forms": [
+      { "local_name": "Trabajador autónomo", "description": "Self-employed individual, must register with Seguridad Social" },
+      { "local_name": "Sociedad Limitada (SL / SRL)", "description": "Limited liability company, €3,000 minimum capital, most common form" },
+      { "local_name": "Sociedad Anónima (SA)", "description": "Public limited company, €60,000 minimum capital" },
+      { "local_name": "Comunidad de Bienes (CB)", "description": "Community of property, simple partnership for shared assets" }
+    ],
+    "social_security": "Managed by Seguridad Social / TGSS. Employees: employer ~30%, employee ~6.4% of gross. Autónomos: income-based contribution system since 2023 (quotes range €230–€500+/month based on net income brackets). Covers healthcare, pension, sickness, parental leave, unemployment.",
+    "immigration_portal": {
+      "name": "Secretaría de Estado de Migraciones",
+      "url": "https://www.inclusion.gob.es/web/migraciones"
+    },
+    "ukraine_support_portal": {
+      "name": "Portal de Protección Temporal Ucrania",
+      "url": "https://www.inclusion.gob.es/web/migraciones/ucrania"
+    },
+    "double_taxation_treaties_url": "https://sede.agenciatributaria.gob.es/Sede/normativa-criterios-interpretativos/convenios-doble-imposicion.html"
+  }
+}

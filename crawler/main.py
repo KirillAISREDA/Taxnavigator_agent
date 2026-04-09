@@ -46,7 +46,7 @@ class KnowledgeCrawler:
             follow_redirects=True,
             headers={
                 "User-Agent": "TaxNavigator-KnowledgeBot/1.0 (+https://taxnavigator-advice.nl)",
-                "Accept-Language": "nl,en;q=0.9,uk;q=0.8",
+                "Accept-Language": "nl,en;q=0.9,uk;q=0.8,de;q=0.7,fr;q=0.6,it;q=0.5,es;q=0.4",
             },
         )
         self._ensure_collection()
@@ -71,6 +71,20 @@ class KnowledgeCrawler:
         allowed_paths = source.get("allowed_paths", [])
 
         logger.info("Crawling source", source_id=source_id, base_url=base_url)
+
+        # Respect robots.txt Crawl-delay
+        crawl_delay = 0.5
+        try:
+            robots_resp = await self.http.get(f"{base_url}/robots.txt")
+            if robots_resp.status_code == 200:
+                for line in robots_resp.text.split('\n'):
+                    if line.lower().startswith('crawl-delay'):
+                        delay = float(line.split(':')[1].strip())
+                        crawl_delay = max(delay, 0.5)
+                        logger.info("Crawl-delay from robots.txt", source_id=source_id, delay=crawl_delay)
+                        break
+        except Exception:
+            pass
 
         visited = set()
         start_urls = source.get("start_urls", [base_url])
@@ -129,8 +143,8 @@ class KnowledgeCrawler:
                     if full_url and full_url.startswith(base_url) and full_url not in visited:
                         to_visit.append(full_url)
 
-                # Be polite — small delay between requests
-                await asyncio.sleep(0.5)
+                # Be polite — respect Crawl-delay
+                await asyncio.sleep(crawl_delay)
 
             except Exception as e:
                 logger.warning("Failed to crawl", url=url, error=str(e))
@@ -187,6 +201,7 @@ class KnowledgeCrawler:
                 "category": source["category"],
                 "page_url": page_url,
                 "language": source.get("language", "nl"),
+                "country": source.get("country", "nl"),
             })
 
             i = end - overlap_chars if end < len(text) else end
@@ -245,6 +260,7 @@ class KnowledgeCrawler:
                             "category": chunk["category"],
                             "page_url": chunk["page_url"],
                             "language": chunk["language"],
+                            "country": chunk.get("country", "nl"),
                             "indexed_at": datetime.utcnow().isoformat(),
                         },
                     )
