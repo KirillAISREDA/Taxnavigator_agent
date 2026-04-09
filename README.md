@@ -142,8 +142,8 @@ docker logs -f taxnav-crawler
 
 ## Автодеплой (GitHub → сервер)
 
-Настроен webhook: при каждом `git push` в `main` сервер
-автоматически подтягивает код и перезапускает контейнеры.
+При каждом `git push` в `main` GitHub Actions автоматически
+подключается к серверу по SSH, подтягивает код и перезапускает контейнеры.
 
 ### Быстрая настройка (один скрипт)
 
@@ -152,36 +152,32 @@ docker logs -f taxnav-crawler
 bash setup-server.sh
 ```
 
-Скрипт сам: сгенерирует SSH-ключ, склонирует репо, создаст .env,
-установит webhook-listener как systemd-сервис, запустит Docker-стек.
-
-### Настройка GitHub Webhook (после setup-server.sh)
-
-1. GitHub → Settings → **Webhooks** → Add webhook
-2. **Payload URL:** `https://YOUR_DOMAIN/deploy/webhook`
-3. **Content type:** `application/json`
-4. **Secret:** (выведен скриптом при установке)
-5. **Events:** Just the push event
-6. Кнопка **Add webhook**
+Скрипт: сгенерирует SSH-ключ, склонирует репо, создаст .env, запустит Docker-стек.
 
 ### Как это работает
 
 ```
-git push → GitHub → POST /deploy/webhook → verify HMAC signature
-                                          → git pull origin main
-                                          → docker-compose build
-                                          → docker-compose up -d
-                                          → health check
+git push → GitHub Actions → SSH на сервер
+                          → git pull origin main
+                          → docker compose build
+                          → docker compose up -d
+                          → health check
 ```
+
+### Настройка GitHub Actions
+
+В Settings → Secrets and variables → Actions добавить:
+- `SERVER_HOST` — IP сервера
+- `SERVER_USER` — SSH-пользователь
+- `SERVER_SSH_KEY` — приватный SSH-ключ
+- `SERVER_PORT` — SSH-порт
 
 ### Мониторинг деплоев
 
 ```bash
-# Лог деплоев
-tail -f /opt/Taxnavigator_agent/deploy.log
-
-# Статус webhook-сервиса
-systemctl status taxnav-webhook
+# GitHub Actions → вкладка Actions в репозитории
+# Или через CLI:
+gh run list --limit 5
 ```
 
 ---
@@ -243,10 +239,9 @@ taxnavigator-agent/
 ├── config/
 │   ├── sources.json        # Конфигурация 9 источников
 │   └── prompts.json        # Системные промпты агента
-├── webhook/
-│   ├── server.py              # GitHub webhook receiver
-│   └── taxnav-webhook.service # Systemd unit file
-├── deploy.sh               # Скрипт деплоя
+├── .github/workflows/
+│   └── deploy.yml          # GitHub Actions auto-deploy (SSH)
+├── deploy.sh               # Скрипт деплоя (вызывается из Actions)
 ├── setup-server.sh         # Полная настройка сервера (1 раз)
 └── nginx/
     └── taxnav-chat.conf    # Nginx конфигурация (пример)

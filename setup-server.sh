@@ -104,54 +104,7 @@ fi
 chmod +x "$PROJECT_DIR/deploy.sh"
 
 # -----------------------------------------------
-# Step 6: Generate webhook secret
-# -----------------------------------------------
-echo ""
-echo "📋 Step 6: Webhook setup"
-
-WEBHOOK_SECRET=$(openssl rand -hex 20)
-echo ""
-echo "═══════════════════════════════════════════"
-echo "🔑 YOUR WEBHOOK SECRET (save this!):"
-echo "   $WEBHOOK_SECRET"
-echo "═══════════════════════════════════════════"
-echo ""
-
-# Update systemd service with the secret
-sed -i "s/CHANGE_ME_TO_RANDOM_STRING/$WEBHOOK_SECRET/" "$PROJECT_DIR/webhook/taxnav-webhook.service"
-
-# -----------------------------------------------
-# Step 7: Install webhook as systemd service
-# -----------------------------------------------
-echo "📋 Step 7: Installing webhook service"
-
-cp "$PROJECT_DIR/webhook/taxnav-webhook.service" /etc/systemd/system/
-systemctl daemon-reload
-systemctl enable taxnav-webhook
-systemctl start taxnav-webhook
-
-echo "✅ Webhook listener running on port 9000"
-
-# -----------------------------------------------
-# Step 8: Configure nginx for webhook
-# -----------------------------------------------
-echo ""
-echo "📋 Step 8: Nginx configuration"
-echo ""
-echo "Add this to your nginx config (or the existing server block):"
-echo ""
-echo "  # GitHub webhook endpoint"
-echo "  location /deploy/webhook {"
-echo "      proxy_pass http://127.0.0.1:9000/webhook;"
-echo "      proxy_set_header X-Real-IP \$remote_addr;"
-echo "      proxy_set_header X-Hub-Signature-256 \$http_x_hub_signature_256;"
-echo "      proxy_set_header X-GitHub-Event \$http_x_github_event;"
-echo "  }"
-echo ""
-read -p "Press ENTER when nginx is configured (or skip for now)..."
-
-# -----------------------------------------------
-# Step 9: Start Docker stack
+# Step 6: Start Docker stack
 # -----------------------------------------------
 echo ""
 echo "📋 Step 9: Starting Docker stack"
@@ -165,7 +118,7 @@ sleep 15
 
 # Health check
 echo ""
-echo "📋 Step 10: Health check"
+echo "📋 Step 7: Health check"
 curl -sf http://localhost:8100/health && echo "" && echo "✅ All services running!" || echo "⚠️ Health check failed — check logs with: docker-compose logs"
 
 # -----------------------------------------------
@@ -180,20 +133,14 @@ echo "📍 Project dir:    $PROJECT_DIR"
 echo "🌐 API:            http://localhost:8100"
 echo "🏥 Health check:   http://localhost:8100/health"
 echo "💬 Chat widget:    http://localhost:8100/widget/"
-echo "🔗 Webhook:        port 9000 (behind nginx)"
 echo ""
 echo "NEXT STEPS:"
 echo ""
-echo "1. Configure GitHub webhook:"
-echo "   → https://github.com/KirillAISREDA/Taxnavigator_agent/settings/hooks/new"
-echo "   → Payload URL: https://YOUR_DOMAIN/deploy/webhook"
-echo "   → Content type: application/json"
-echo "   → Secret: $WEBHOOK_SECRET"
-echo "   → Events: Just the push event"
+echo "1. Configure GitHub Actions secrets (Settings → Secrets → Actions):"
+echo "   → SERVER_HOST, SERVER_USER, SERVER_SSH_KEY, SERVER_PORT"
 echo ""
-echo "2. Test the webhook by pushing a commit"
+echo "2. Push a commit to main — GitHub Actions will auto-deploy"
 echo ""
-echo "3. Monitor logs:"
-echo "   tail -f $PROJECT_DIR/deploy.log"
-echo "   docker-compose logs -f"
+echo "3. Monitor: gh run list --limit 5"
+echo "   Logs:    docker compose logs -f"
 echo ""

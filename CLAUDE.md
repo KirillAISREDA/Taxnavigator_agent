@@ -11,7 +11,7 @@ business registration, and accounting queries. Special focus on Ukrainian client
 - **Vector DB:** Qdrant (RAG retrieval)
 - **Cache:** Redis (sessions, rate limiting)
 - **Crawler:** BeautifulSoup + scheduled re-indexing of 9 Dutch gov sources
-- **Deploy:** Docker Compose, Portainer, GitHub webhook auto-deploy
+- **Deploy:** Docker Compose, Portainer, GitHub Actions auto-deploy (SSH)
 - **Frontend:** Vanilla HTML/CSS/JS chat widget (embedded via iframe)
 
 ## Project Structure
@@ -36,9 +36,8 @@ business registration, and accounting queries. Special focus on Ukrainian client
 ├── config/
 │   ├── sources.json        # 9 knowledge sources configuration
 │   └── prompts.json        # System prompts (NL/UK/RU/EN)
-├── webhook/
-│   ├── server.py           # GitHub webhook receiver for auto-deploy
-│   └── taxnav-webhook.service
+├── .github/workflows/
+│   └── deploy.yml          # GitHub Actions auto-deploy (SSH → server)
 ├── docker-compose.yml      # Qdrant + Redis + API + Crawler
 ├── Dockerfile              # API container
 ├── Dockerfile.crawler      # Crawler container
@@ -66,7 +65,7 @@ docker logs -f taxnav-crawler
 # Rebuild single service
 docker-compose up -d --build --no-deps api
 
-# Full deploy (what webhook triggers)
+# Manual deploy on server (GitHub Actions does this automatically)
 bash deploy.sh
 ```
 
