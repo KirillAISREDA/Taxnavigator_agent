@@ -1,11 +1,8 @@
 """Core AI Agent — intent routing, RAG retrieval, response generation.
-Changes:
-  • detect_language_with_session: resolves language from session history
-    when the current message is empty/short (e.g. file upload w/o caption).
-    Ensures the bot always replies in the CLIENT's language.
-  • _build_system_prompt injects formatting_prompt (no ###/####, use emoji)
-  • _build_system_prompt injects anti_diy_prompt from prompts.json
-  • _check_escalation expanded with tax_filing, business_registration
+
+Supports two modes:
+  • "limited" (default) — client-facing bot with anti-DIY restrictions
+  • "full" — professional bot with full tax advisory capabilities
 """
 
 import json
@@ -19,6 +16,10 @@ from app.services.redis_service import RedisService
 
 logger = structlog.get_logger()
 settings = get_settings()
+
+# Valid modes
+MODE_LIMITED = "limited"
+MODE_FULL = "full"
 
 
 class AgentService:
@@ -50,27 +51,17 @@ class AgentService:
         self, text: str | None, session_id: str,
     ) -> str:
         """Detect language from text; if text is empty or too short for
-        reliable detection, infer from recent *user* messages in session.
-
-        Priority:
-        1. Current text (if >= 8 chars — enough for langdetect)
-        2. Last user messages from session history
-        3. Current text even if short
-        4. Default "nl"
-        """
-        # 1. Try current text first (if substantial)
+        reliable detection, infer from recent *user* messages in session."""
         if text and len(text.strip()) >= 8:
             lang = self.detect_language(text)
             if lang:
                 return lang
 
-        # 2. Fall back to session history
         try:
             history = await self.redis.get_history(session_id)
             for msg in reversed(history):
                 if msg.get("role") == "user":
                     content = msg.get("content", "")
-                    # Skip file-upload markers like "[📄 filename.pdf]"
                     lines = [
                         l for l in content.split("\n")
                         if l.strip() and not l.strip().startswith("[📄")
@@ -83,7 +74,6 @@ class AgentService:
         except Exception:
             pass
 
-        # 3. Try current text even if short
         if text and text.strip():
             lang = self.detect_language(text)
             if lang:
@@ -127,7 +117,11 @@ class AgentService:
 
     # ── full pipeline ─────────────────────────────────────────────
     async def process_message(
-        self, message: str, session_id: str, channel: str = "web",
+        self,
+        message: str,
+        session_id: str,
+        channel: str = "web",
+        mode: str = MODE_LIMITED,
     ) -> dict:
         language = self.detect_language(message)
         history = await self.redis.get_history(session_id)
@@ -140,7 +134,7 @@ class AgentService:
                 query=message, categories=categories, limit=5,
             )
 
-        system_prompt = self._build_system_prompt(language, intent, context_chunks)
+        system_prompt = self._build_system_prompt(language, intent, context_chunks, mode)
 
         messages = [{"role": "system", "content": system_prompt}]
         for h in history[-10:]:
@@ -149,17 +143,19 @@ class AgentService:
 
         resp = await self.client.chat.completions.create(
             model=self.model, messages=messages,
-            max_tokens=1000, temperature=0.3,
+            max_tokens=1500 if mode == MODE_FULL else 1000,
+            temperature=0.3,
         )
         assistant_message = resp.choices[0].message.content
-        needs_escalation = self._check_escalation(intent, assistant_message)
+        needs_escalation = self._check_escalation(intent, assistant_message, mode)
 
         await self.redis.add_to_history(session_id, "user", message)
         await self.redis.add_to_history(session_id, "assistant", assistant_message)
 
         logger.info("Message processed",
                     session_id=session_id, channel=channel,
-                    language=language, intent=intent, escalation=needs_escalation)
+                    language=language, intent=intent,
+                    escalation=needs_escalation, mode=mode)
 
         return {
             "response": assistant_message,
@@ -171,10 +167,19 @@ class AgentService:
         }
 
     # ── helpers ────────────────────────────────────────────────────
-    def _build_system_prompt(self, language: str, intent: str, chunks: list) -> str:
-        base = self.prompts["base_system_prompt"]
-        escalation = self.prompts["escalation_prompt"]
-        anti_diy = self.prompts.get("anti_diy_prompt", "")
+    def _build_system_prompt(
+        self, language: str, intent: str, chunks: list,
+        mode: str = MODE_LIMITED,
+    ) -> str:
+        if mode == MODE_FULL:
+            base = self.prompts.get("base_system_prompt_full", self.prompts["base_system_prompt"])
+            escalation = self.prompts.get("escalation_prompt_full", self.prompts["escalation_prompt"])
+            anti_diy = self.prompts.get("anti_diy_prompt_full", "")
+        else:
+            base = self.prompts["base_system_prompt"]
+            escalation = self.prompts["escalation_prompt"]
+            anti_diy = self.prompts.get("anti_diy_prompt", "")
+
         formatting = self.prompts.get("formatting_prompt", "")
 
         context = ""
@@ -190,15 +195,28 @@ class AgentService:
             "ru": "Отвечай на русском языке.",
             "en": "Respond in English.",
         }
-        return (
-            f"{base}\n\n{escalation}\n\n{anti_diy}\n\n{formatting}\n\n"
-            f"{lang_map.get(language, lang_map['en'])}\n{context}"
-        )
 
-    def _check_escalation(self, intent: str, response: str) -> bool:
-        if intent in {"appointment", "double_taxation", "ukrainian_business",
-                       "tax_filing", "business_registration"}:
-            return True
-        markers = ["afspraak", "specialist", "консультац", "запис",
-                    "appointment", "consultation"]
-        return any(m in response.lower() for m in markers)
+        parts = [base, escalation]
+        if anti_diy:
+            parts.append(anti_diy)
+        parts.append(formatting)
+        parts.append(lang_map.get(language, lang_map["en"]))
+        if context:
+            parts.append(context)
+
+        return "\n\n".join(parts)
+
+    def _check_escalation(self, intent: str, response: str, mode: str = MODE_LIMITED) -> bool:
+        if mode == MODE_FULL:
+            if intent in {"appointment"}:
+                return True
+            markers = ["advocaat", "lawyer", "juridisch geschil", "fusie",
+                        "overname", "strafrechtelijk"]
+            return any(m in response.lower() for m in markers)
+        else:
+            if intent in {"appointment", "double_taxation", "ukrainian_business",
+                           "tax_filing", "business_registration"}:
+                return True
+            markers = ["afspraak", "specialist", "консультац", "запис",
+                        "appointment", "consultation"]
+            return any(m in response.lower() for m in markers)

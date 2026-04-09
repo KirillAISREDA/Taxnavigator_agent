@@ -19,9 +19,13 @@ class Settings(BaseSettings):
     redis_host: str = "redis"
     redis_port: int = 6379
 
-    # Telegram
+    # Telegram — limited bot (client-facing)
     telegram_bot_token: str = ""
     telegram_webhook_url: str = ""
+
+    # Telegram — full bot (internal / professional use)
+    telegram_bot_token_full: str = ""
+    telegram_webhook_url_full: str = ""
 
     # WhatsApp / Twilio
     twilio_account_sid: str = ""

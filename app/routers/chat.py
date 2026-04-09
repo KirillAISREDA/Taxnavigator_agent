@@ -1,4 +1,7 @@
-"""Chat API router — text chat + file upload endpoints."""
+"""Chat API router — text chat + file upload endpoints.
+
+Supports mode parameter: "limited" (default) or "full".
+"""
 
 import uuid
 import structlog
@@ -6,7 +9,7 @@ from fastapi import APIRouter, Request, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import Optional
 
-from app.services.agent_service import AgentService
+from app.services.agent_service import AgentService, MODE_LIMITED, MODE_FULL
 from app.services.document_service import DocumentService
 
 logger = structlog.get_logger()
@@ -17,6 +20,7 @@ class ChatRequest(BaseModel):
     message: str
     session_id: str | None = None
     channel: str = "web"
+    mode: str = MODE_LIMITED  # "limited" or "full"
 
 
 class ChatResponse(BaseModel):
@@ -30,12 +34,13 @@ class ChatResponse(BaseModel):
 
 
 # ──────────────────────────────────────────────────────────────────
-# POST /api/chat/ — text only (backward-compatible)
+# POST /api/chat/ — text only
 # ──────────────────────────────────────────────────────────────────
 @router.post("/", response_model=ChatResponse)
 async def chat(request: Request, body: ChatRequest):
     redis = request.app.state.redis
     session_id = body.session_id or str(uuid.uuid4())
+    mode = body.mode if body.mode in (MODE_LIMITED, MODE_FULL) else MODE_LIMITED
 
     rate = await redis.increment_rate(session_id)
     if rate > 30:
@@ -47,7 +52,8 @@ async def chat(request: Request, body: ChatRequest):
 
     agent = AgentService(qdrant=request.app.state.qdrant, redis=redis)
     result = await agent.process_message(
-        message=body.message, session_id=session_id, channel=body.channel,
+        message=body.message, session_id=session_id,
+        channel=body.channel, mode=mode,
     )
     return ChatResponse(**result)
 
@@ -62,10 +68,12 @@ async def chat_with_file(
     message: str = Form(default=""),
     session_id: Optional[str] = Form(default=None),
     channel: str = Form(default="web"),
+    mode: str = Form(default=MODE_LIMITED),
 ):
     """Analyze an uploaded document/image and respond in context."""
     redis = request.app.state.redis
     session_id = session_id or str(uuid.uuid4())
+    mode = mode if mode in (MODE_LIMITED, MODE_FULL) else MODE_LIMITED
 
     rate = await redis.increment_rate(session_id)
     if rate > 30:
@@ -75,7 +83,6 @@ async def chat_with_file(
             intent="rate_limited", needs_escalation=False,
         )
 
-    # ── read & validate ───────────────────────────────────────────
     doc_svc = DocumentService()
     file_data = await file.read()
     fname = file.filename or "document"
@@ -87,15 +94,14 @@ async def chat_with_file(
             language="en", intent="file_error", needs_escalation=False,
         )
 
-    # ── detect language from SESSION, not just the message field ──
     agent = AgentService(qdrant=request.app.state.qdrant, redis=redis)
     language = await agent.detect_language_with_session(message, session_id)
 
-    # ── GPT-4o Vision analysis ────────────────────────────────────
     try:
         doc = await doc_svc.analyze_document(
             file_data=file_data, filename=fname,
             user_message=message, language=language,
+            mode=mode,
         )
     except Exception:
         return ChatResponse(
@@ -104,7 +110,6 @@ async def chat_with_file(
             intent="file_error", needs_escalation=False,
         )
 
-    # ── optional RAG enrichment ───────────────────────────────────
     doc_type = doc["document_type"]
     cat_map = {
         "tax_assessment": ["tax"], "tax_letter": ["tax"],
@@ -120,7 +125,6 @@ async def chat_with_file(
         )
         sources = [c["source_url"] for c in chunks if c.get("source_url")]
 
-    # ── save to session history ───────────────────────────────────
     user_note = f"[📄 {fname}]"
     if message:
         user_note += f"\n{message}"
