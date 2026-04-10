@@ -11,6 +11,7 @@ from typing import Optional
 
 from app.services.agent_service import AgentService, MODE_LIMITED, MODE_FULL
 from app.services.document_service import DocumentService
+from app.services.transcription_service import transcribe_audio
 
 logger = structlog.get_logger()
 router = APIRouter()
@@ -163,6 +164,94 @@ async def chat_with_file(
         language=language, intent=f"document_{doc_type}",
         needs_escalation=doc["needs_escalation"],
         sources=sources, document_type=doc_type,
+    )
+
+
+# ──────────────────────────────────────────────────────────────────
+# POST /api/chat/voice — voice message transcription + response
+# ──────────────────────────────────────────────────────────────────
+class VoiceResponse(BaseModel):
+    transcription: str
+    response: str
+    session_id: str
+    language: str
+    intent: str
+    needs_escalation: bool
+    sources: list[str] = []
+    has_actions: bool = False
+
+
+@router.post("/voice", response_model=VoiceResponse)
+async def chat_voice(
+    request: Request,
+    file: UploadFile = File(...),
+    session_id: Optional[str] = Form(default=None),
+    channel: str = Form(default="web"),
+    mode: str = Form(default=MODE_LIMITED),
+):
+    """Transcribe voice audio via Whisper and process as chat message."""
+    redis = request.app.state.redis
+    session_id = session_id or str(uuid.uuid4())
+    mode = mode if mode in (MODE_LIMITED, MODE_FULL) else MODE_LIMITED
+
+    file_data = await file.read()
+    if not file_data:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=400, content={"error": "Empty audio file"})
+
+    if len(file_data) > 25 * 1024 * 1024:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=400, content={"error": "File too large (max 25 MB)"})
+
+    rate = await redis.increment_rate(session_id)
+    if rate > 30:
+        return VoiceResponse(
+            transcription="", response="U stuurt te veel berichten. Wacht even.",
+            session_id=session_id, language="nl",
+            intent="rate_limited", needs_escalation=False,
+        )
+
+    try:
+        transcription = await transcribe_audio(file_data, file.filename or "voice.webm")
+    except Exception as e:
+        logger.error("Voice transcription failed", error=str(e))
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=500, content={"error": "Transcription failed"})
+
+    if not transcription:
+        return VoiceResponse(
+            transcription="", response="Could not recognise speech. Please try again.",
+            session_id=session_id, language="en",
+            intent="voice_empty", needs_escalation=False,
+        )
+
+    agent = AgentService(qdrant=request.app.state.qdrant, redis=redis)
+    result = await agent.process_message(
+        message=transcription, session_id=session_id,
+        channel=channel, mode=mode,
+    )
+
+    # Log to PostgreSQL (non-blocking)
+    try:
+        await request.app.state.db.log_interaction(
+            session_id=session_id, channel=channel, mode=mode,
+            user_message=f"[voice] {transcription}",
+            assistant_message=result.get("response", ""),
+            intent=result.get("intent"),
+            language=result.get("language", "nl"),
+            country=result.get("country", "nl"),
+            needs_escalation=result.get("needs_escalation", False),
+            sources=result.get("sources"),
+        )
+    except Exception:
+        pass
+
+    return VoiceResponse(
+        transcription=transcription,
+        **{k: v for k, v in result.items() if k in (
+            "response", "session_id", "language", "intent",
+            "needs_escalation", "sources", "has_actions",
+        )},
     )
 
 

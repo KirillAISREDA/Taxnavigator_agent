@@ -5,15 +5,14 @@ Supports two bots:
   • Full bot (TELEGRAM_BOT_TOKEN_FULL) — professional with full capabilities
 """
 
-import io
 import json
 import structlog
 import httpx
-from openai import AsyncOpenAI
 from fastapi import APIRouter, Request, Response
 
 from app.services.agent_service import AgentService, MODE_LIMITED, MODE_FULL
 from app.services.document_service import DocumentService
+from app.services.transcription_service import transcribe_audio
 from app.settings import get_settings
 
 logger = structlog.get_logger()
@@ -39,23 +38,6 @@ async def _download_telegram_file(file_id: str, client: httpx.AsyncClient, bot_t
     )
     return file_resp.content, filename
 
-
-async def _transcribe_voice(file_data: bytes, filename: str) -> str:
-    """Transcribe voice message using OpenAI Whisper API."""
-    openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
-
-    audio_file = io.BytesIO(file_data)
-    audio_file.name = filename or "voice.ogg"
-
-    transcript = await openai_client.audio.transcriptions.create(
-        model="whisper-1",
-        file=audio_file,
-        response_format="text",
-    )
-
-    text = transcript.strip() if isinstance(transcript, str) else transcript.text.strip()
-    logger.info("Voice transcribed", length=len(text), preview=text[:80])
-    return text
 
 
 def _extract_voice_file_id(message: dict) -> str | None:
@@ -179,7 +161,7 @@ async def _handle_telegram_update(
                 voice_data, voice_filename = await _download_telegram_file(
                     voice_file_id, client, bot_token,
                 )
-                transcription = await _transcribe_voice(voice_data, voice_filename)
+                transcription = await transcribe_audio(voice_data, voice_filename)
                 if not transcription:
                     result = {"response": "🎤 Не удалось распознать голосовое сообщение. Попробуйте отправить текстом."}
                 else:
