@@ -59,7 +59,7 @@
 
 <div class="header">
   <div class="header-logo">🧭</div>
-  <div class="header-info"><h1>TaxNavigator Assistant</h1><p>Online — antwoord binnen seconden</p></div>
+  <div class="header-info"><h1>TaxNavigator Assistant</h1><p id="status">Online — antwoord binnen seconden</p></div>
   <button class="header-close" onclick="parent.postMessage('taxnav-close','*')">&times;</button>
 </div>
 <div class="lang-bar">
@@ -69,7 +69,7 @@
   <button data-lang="en">EN</button>
 </div>
 <div class="messages" id="messages">
-  <div class="message bot">Welkom bij TaxNavigator &amp; Advice! 👋<br><br>Ik kan u helpen met vragen over belastingen, bedrijfsregistratie, boekhouding en meer.<br>U kunt ook <b>documenten en foto's</b> uploaden — ik analyseer en vertaal ze voor u.<br><br>Hoe kan ik u helpen?</div>
+  <div class="message bot" id="welcome"></div>
 </div>
 <div class="quick-actions" id="qa">
   <div class="quick-action" onclick="sendQuick('Wat zijn jullie diensten?')">📋 Diensten</div>
@@ -77,7 +77,7 @@
   <div class="quick-action" onclick="sendQuick('BTW aangifte uitleg')">💰 BTW</div>
   <div class="quick-action" onclick="sendQuick('Ik ben Oekraïner, wat zijn mijn rechten?')">🇺🇦 Для українців</div>
 </div>
-<div class="drop-overlay" id="dropOverlay"><div class="drop-box"><div class="ic">📄</div><p>Drop uw document hier</p></div></div>
+<div class="drop-overlay" id="dropOverlay"><div class="drop-box"><div class="ic">📄</div><p id="dropText">Drop uw document hier</p></div></div>
 <div class="file-bar" id="fileBar">
   <div id="fileThumb"></div>
   <div class="info"><div class="name" id="fileName"></div><div class="size" id="fileSize"></div></div>
@@ -99,10 +99,80 @@ function escHtml(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 const API='/api/chat/',API_UP='/api/chat/upload';
-let sessionId=null,pendingFile=null;
+let sessionId=null,pendingFile=null,currentLang='nl';
 const $m=document.getElementById('messages'),$i=document.getElementById('input'),$s=document.getElementById('sendBtn'),$qa=document.getElementById('qa'),$bar=document.getElementById('fileBar'),$drop=document.getElementById('dropOverlay');
 
-document.querySelectorAll('.lang-bar button').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.lang-bar button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const g={nl:'Stel uw vraag...',uk:'Поставте своє запитання...',ru:'Задайте ваш вопрос...',en:'Ask your question...'};$i.placeholder=g[b.dataset.lang]||g.en})});
+const i18n={
+  nl:{
+    welcome:'Welkom bij TaxNavigator & Advice! 👋\n\nIk kan u helpen met vragen over belastingen, bedrijfsregistratie, boekhouding en meer.\nU kunt ook documenten en foto\'s uploaden — ik analyseer en vertaal ze voor u.\n\nHoe kan ik u helpen?',
+    status:'Online — antwoord binnen seconden',
+    placeholder:'Stel uw vraag...',
+    quickActions:[
+      {label:'📋 Diensten',query:'Wat zijn jullie diensten?'},
+      {label:'🏢 KVK registratie',query:'Hoe registreer ik een bedrijf?'},
+      {label:'💰 BTW',query:'BTW aangifte uitleg'},
+      {label:'🇺🇦 Для українців',query:'Ik ben Oekraïner, wat zijn mijn rechten?'}
+    ],
+    errorMsg:'Er is een fout opgetreden. Probeer het opnieuw.',
+    escalation:'💡 Wilt u een afspraak maken met onze specialist? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Neem contact op</a>',
+    dropText:'Drop uw document hier'
+  },
+  uk:{
+    welcome:'Ласкаво просимо до TaxNavigator & Advice! 👋\n\nЯ можу допомогти з питаннями про податки, реєстрацію бізнесу, бухгалтерію та інше.\nВи також можете завантажити документи та фото — я проаналізую та перекладу їх для вас.\n\nЧим можу допомогти?',
+    status:'Онлайн — відповідь за кілька секунд',
+    placeholder:'Поставте своє запитання...',
+    quickActions:[
+      {label:'📋 Послуги',query:'Які у вас послуги?'},
+      {label:'🏢 Реєстрація KVK',query:'Як зареєструвати бізнес?'},
+      {label:'💰 ПДВ',query:'Поясніть подачу ПДВ'},
+      {label:'🇺🇦 Для українців',query:'Я українець, які мої права?'}
+    ],
+    errorMsg:'Сталася помилка. Спробуйте ще раз.',
+    escalation:'💡 Бажаєте записатися до нашого спеціаліста? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Зв\'яжіться з нами</a>',
+    dropText:'Перетягніть документ сюди'
+  },
+  ru:{
+    welcome:'Добро пожаловать в TaxNavigator & Advice! 👋\n\nЯ могу помочь с вопросами о налогах, регистрации бизнеса, бухгалтерии и многом другом.\nВы также можете загрузить документы и фото — я проанализирую и переведу их для вас.\n\nЧем могу помочь?',
+    status:'Онлайн — ответ за несколько секунд',
+    placeholder:'Задайте ваш вопрос...',
+    quickActions:[
+      {label:'📋 Услуги',query:'Какие у вас услуги?'},
+      {label:'🏢 Регистрация KVK',query:'Как зарегистрировать бизнес?'},
+      {label:'💰 НДС',query:'Объясните подачу НДС'},
+      {label:'🇺🇦 Для українців',query:'Я украинец, какие у меня права?'}
+    ],
+    errorMsg:'Произошла ошибка. Попробуйте ещё раз.',
+    escalation:'💡 Хотите записаться к нашему специалисту? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Свяжитесь с нами</a>',
+    dropText:'Перетащите документ сюда'
+  },
+  en:{
+    welcome:'Welcome to TaxNavigator & Advice! 👋\n\nI can help you with questions about taxes, business registration, accounting and more.\nYou can also upload documents and photos — I\'ll analyse and translate them for you.\n\nHow can I help you?',
+    status:'Online — reply within seconds',
+    placeholder:'Ask your question...',
+    quickActions:[
+      {label:'📋 Services',query:'What are your services?'},
+      {label:'🏢 KVK registration',query:'How do I register a business?'},
+      {label:'💰 VAT',query:'Explain VAT filing'},
+      {label:'🇺🇦 For Ukrainians',query:'I am Ukrainian, what are my rights?'}
+    ],
+    errorMsg:'An error occurred. Please try again.',
+    escalation:'💡 Would you like to book an appointment with our specialist? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Contact us</a>',
+    dropText:'Drop your document here'
+  }
+};
+
+function applyLanguage(lang){
+  const t=i18n[lang]||i18n.nl;
+  currentLang=lang;
+  document.getElementById('welcome').innerHTML=escHtml(t.welcome).replace(/\n/g,'<br>');
+  document.getElementById('status').textContent=t.status;
+  $i.placeholder=t.placeholder;
+  document.getElementById('dropText').textContent=t.dropText;
+  $qa.innerHTML=t.quickActions.map(a=>`<div class="quick-action" onclick="sendQuick('${a.query.replace(/'/g,"\\'")}')">${a.label}</div>`).join('');
+  document.querySelectorAll('.lang-bar button').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+}
+
+document.querySelectorAll('.lang-bar button').forEach(b=>{b.addEventListener('click',()=>applyLanguage(b.dataset.lang))});
 $i.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
 
 // drag & drop
@@ -138,7 +208,7 @@ function addMsg(text,type,o={}){
   if(o.sources?.length&&type==='bot')h+='<div class="sources">📎 '+o.sources.filter(Boolean).map(s=>{try{return`<a href="${s}" target="_blank">${new URL(s).hostname}</a>`}catch{return''}}).join(' · ')+'</div>';
   d.innerHTML=h;$m.appendChild(d);$m.scrollTop=$m.scrollHeight;
 }
-function addEsc(){const d=document.createElement('div');d.className='escalation';d.innerHTML='💡 Wilt u een afspraak maken met onze specialist? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Neem contact op</a>';$m.appendChild(d);$m.scrollTop=$m.scrollHeight}
+function addEsc(){const d=document.createElement('div');d.className='escalation';d.innerHTML=(i18n[currentLang]||i18n.nl).escalation;$m.appendChild(d);$m.scrollTop=$m.scrollHeight}
 function showTyping(){const d=document.createElement('div');d.className='typing-indicator';d.id='typing';d.innerHTML='<span></span><span></span><span></span>';$m.appendChild(d);$m.scrollTop=$m.scrollHeight}
 function hideTyping(){document.getElementById('typing')?.remove()}
 function sendQuick(t){$i.value=t;sendMessage()}
@@ -155,18 +225,19 @@ async function sendMessage(){
     let data;
     if(pendingFile){
       const fd=new FormData();fd.append('file',pendingFile);fd.append('message',text);
-      if(sessionId)fd.append('session_id',sessionId);fd.append('channel','web');
+      if(sessionId)fd.append('session_id',sessionId);fd.append('channel','web');fd.append('lang',currentLang);
       data=await(await fetch(API_UP,{method:'POST',body:fd})).json();
       removeFile();
     }else{
-      data=await(await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,session_id:sessionId,channel:'web'})})).json();
+      data=await(await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,session_id:sessionId,channel:'web',lang:currentLang})})).json();
     }
     hideTyping();sessionId=data.session_id;
     addMsg(data.response,'bot',{sources:data.sources,docType:data.document_type});
     if(data.needs_escalation)addEsc();
-  }catch(err){hideTyping();addMsg('Er is een fout opgetreden. Probeer het opnieuw.','bot');console.error(err)}
+  }catch(err){hideTyping();addMsg((i18n[currentLang]||i18n.nl).errorMsg,'bot');console.error(err)}
   finally{$s.disabled=false;$i.focus();if(tu)URL.revokeObjectURL(tu)}
 }
+applyLanguage('nl');
 </script>
 </body>
 </html>
