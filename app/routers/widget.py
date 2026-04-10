@@ -88,7 +88,7 @@ async def widget_embed_script(request: Request):
     var iframe = document.createElement('iframe');
     iframe.id  = WIDGET_ID;
     iframe.src = ORIGIN + '/widget/' + (cfg.lang ? '?lang=' + cfg.lang : '');
-    iframe.allow = 'clipboard-write';
+    iframe.allow = 'clipboard-write; microphone';
     iframe.style.cssText = [
       'position:fixed',
       'bottom:' + (cfg.offsetY + 70) + 'px',
