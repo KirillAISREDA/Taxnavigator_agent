@@ -92,7 +92,7 @@ async def widget_embed_script(request: Request):
       'border:none',
       'border-radius:16px',
       'box-shadow:0 8px 32px rgba(0,0,0,0.15)',
-      'z-index:99999',
+      'z-index:2147483646',
       'display:none',
       'transition:opacity 0.25s ease, transform 0.25s ease',
       'opacity:0',
@@ -109,7 +109,7 @@ async def widget_embed_script(request: Request):
       + '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
     btn.style.cssText = [
       'position:fixed',
-      'bottom:' + cfg.offsetY + 'px',
+      'bottom:' + (cfg.offsetY + 70) + 'px',
       side + ':' + cfg.offsetX + 'px',
       oppositeSide + ':auto',
       'width:60px',
@@ -121,7 +121,7 @@ async def widget_embed_script(request: Request):
       'justify-content:center',
       'cursor:pointer',
       'box-shadow:0 4px 16px rgba(0,0,0,0.2)',
-      'z-index:100000',
+      'z-index:2147483647',
       'transition:transform 0.2s ease, box-shadow 0.2s ease',
     ].join(';');
 
@@ -170,11 +170,14 @@ async def widget_embed_script(request: Request):
       var mobile = window.innerWidth < 500;
       if (mobile) {{
         iframe.style.width  = '100vw';
-        iframe.style.height = '100vh';
+        iframe.style.height = '100dvh';
         iframe.style.bottom = '0';
         iframe.style[side]  = '0';
         iframe.style.borderRadius = '0';
         iframe.style.maxWidth = '100vw';
+        iframe.style.zIndex = '2147483647';
+        iframe.style.paddingTop = 'env(safe-area-inset-top)';
+        iframe.style.paddingBottom = 'env(safe-area-inset-bottom)';
       }} else {{
         iframe.style.width  = '400px';
         iframe.style.height = 'min(600px, calc(100vh - 120px))';
@@ -182,6 +185,9 @@ async def widget_embed_script(request: Request):
         iframe.style[side]  = cfg.offsetX + 'px';
         iframe.style.borderRadius = '16px';
         iframe.style.maxWidth = 'calc(100vw - 32px)';
+        iframe.style.zIndex = '99999';
+        iframe.style.paddingTop = '0';
+        iframe.style.paddingBottom = '0';
       }}
     }}
     window.addEventListener('resize', adjustMobile);
