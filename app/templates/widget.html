@@ -122,7 +122,8 @@ const i18n={
     errorMsg:'Er is een fout opgetreden. Probeer het opnieuw.',
     micError:'Microfoon niet beschikbaar',
     recording:'Opname...',
-    escalation:'💡 Wilt u een afspraak maken met onze specialist? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Neem contact op</a>',
+    escalationText:'Wilt u een afspraak maken met onze specialist?',
+    escalationBtn:'Neem contact op',
     dropText:'Drop uw document hier'
   },
   uk:{
@@ -138,7 +139,8 @@ const i18n={
     errorMsg:'Сталася помилка. Спробуйте ще раз.',
     micError:'Мікрофон недоступний',
     recording:'Запис...',
-    escalation:'💡 Бажаєте записатися до нашого спеціаліста? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Зв\'яжіться з нами</a>',
+    escalationText:'Бажаєте записатися до нашого спеціаліста?',
+    escalationBtn:'Зв\'яжіться з нами',
     dropText:'Перетягніть документ сюди'
   },
   ru:{
@@ -154,7 +156,8 @@ const i18n={
     errorMsg:'Произошла ошибка. Попробуйте ещё раз.',
     micError:'Микрофон недоступен',
     recording:'Запись...',
-    escalation:'💡 Хотите записаться к нашему специалисту? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Свяжитесь с нами</a>',
+    escalationText:'Хотите записаться к нашему специалисту?',
+    escalationBtn:'Свяжитесь с нами',
     dropText:'Перетащите документ сюда'
   },
   en:{
@@ -170,7 +173,8 @@ const i18n={
     errorMsg:'An error occurred. Please try again.',
     micError:'Microphone not available',
     recording:'Recording...',
-    escalation:'💡 Would you like to book an appointment with our specialist? <a href="https://taxnavigator-advice.nl/#contact" target="_blank">Contact us</a>',
+    escalationText:'Would you like to book an appointment with our specialist?',
+    escalationBtn:'Contact us',
     dropText:'Drop your document here'
   }
 };
@@ -218,11 +222,13 @@ function addMsg(text,type,o={}){
   const d=document.createElement('div');d.className=`message ${type}`;let h='';
   if(o.fileName&&type==='user'){if(o.thumbUrl)h+=`<img class="file-thumb" src="${o.thumbUrl}">`;h+=`<span class="file-badge">📄 ${o.fileName}</span><br>`}
   if(o.docType&&type==='bot')h+=`<span class="file-badge">📄 ${o.docType}</span><br>`;
-  h+=escHtml(text).replace(/\n/g,'<br>');
-  if(o.sources?.length&&type==='bot')h+='<div class="sources">📎 '+o.sources.filter(Boolean).map(s=>{try{return`<a href="${s}" target="_blank">${new URL(s).hostname}</a>`}catch{return''}}).join(' · ')+'</div>';
+  let escaped=escHtml(text);
+  escaped=escaped.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  escaped=escaped.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g,'<em>$1</em>');
+  h+=escaped.replace(/\n/g,'<br>');
   d.innerHTML=h;$m.appendChild(d);$m.scrollTop=$m.scrollHeight;
 }
-function addEsc(){const d=document.createElement('div');d.className='escalation';d.innerHTML=(i18n[currentLang]||i18n.nl).escalation;$m.appendChild(d);$m.scrollTop=$m.scrollHeight}
+function addEsc(){const t=i18n[currentLang]||i18n.nl;const d=document.createElement('div');d.className='escalation';d.innerHTML='💡 '+t.escalationText+' <a href="https://taxnavigator-advice.nl/#contact" target="_blank">'+t.escalationBtn+'</a>';$m.appendChild(d);$m.scrollTop=$m.scrollHeight}
 function showTyping(){const d=document.createElement('div');d.className='typing-indicator';d.id='typing';d.innerHTML='<span></span><span></span><span></span>';$m.appendChild(d);$m.scrollTop=$m.scrollHeight}
 function hideTyping(){document.getElementById('typing')?.remove()}
 function sendQuick(t){$i.value=t;sendMessage()}
@@ -246,7 +252,8 @@ async function sendMessage(){
       data=await(await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,session_id:sessionId,channel:'web',lang:currentLang})})).json();
     }
     hideTyping();sessionId=data.session_id;
-    addMsg(data.response,'bot',{sources:data.sources,docType:data.document_type});
+    if(data.language&&data.language!==currentLang&&i18n[data.language])applyLanguage(data.language);
+    addMsg(data.response,'bot',{docType:data.document_type});
     if(data.needs_escalation)addEsc();
   }catch(err){hideTyping();addMsg((i18n[currentLang]||i18n.nl).errorMsg,'bot');console.error(err)}
   finally{$s.disabled=false;$i.focus();if(tu)URL.revokeObjectURL(tu)}
@@ -284,7 +291,8 @@ async function toggleRecording(){
         if(data.error){addMsg(data.error,'bot');return}
         sessionId=data.session_id;
         if(data.transcription)addMsg(data.transcription,'user');
-        addMsg(data.response,'bot',{sources:data.sources});
+        if(data.language&&data.language!==currentLang&&i18n[data.language])applyLanguage(data.language);
+        addMsg(data.response,'bot');
         if(data.needs_escalation)addEsc();
       }catch(err){hideTyping();addMsg((i18n[currentLang]||i18n.nl).errorMsg,'bot');console.error(err)}
       finally{$s.disabled=false;$i.focus()}
