@@ -28,9 +28,9 @@
     @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
     .escalation{background:#FFF3CD;border:1px solid #FFECB5;border-radius:12px;padding:12px 16px;margin:4px 0;font-size:13px;color:#664D03;align-self:flex-start;max-width:85%}
     .escalation a{color:var(--pri);font-weight:600;text-decoration:none}
-    .quick-actions{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 12px}
-    .quick-action{background:var(--wh);border:1px solid var(--g3);border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;transition:all .2s;color:var(--g8)}
-    .quick-action:hover{border-color:var(--pri);color:var(--pri);background:#F0F7F4}
+    .quick-actions{display:flex;flex-direction:column;gap:10px;padding:0 20px 12px}
+    .quick-action{background:var(--wh);border:1px solid var(--g3);border-radius:12px;padding:14px 20px;font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;color:var(--g8);min-height:56px;display:flex;align-items:center;gap:8px}
+    .quick-action:hover{border-color:var(--pri);color:var(--pri);background:#F0F7F4;transform:translateY(-1px);box-shadow:0 4px 12px rgba(27,77,62,0.15)}
     .file-bar{display:none;padding:8px 16px;background:var(--g1);border-top:1px solid var(--g3);align-items:center;gap:10px;flex-shrink:0}
     .file-bar.active{display:flex}
     .file-bar img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--g3)}
@@ -66,20 +66,15 @@
   <button class="header-close" onclick="parent.postMessage('taxnav-close','*')">&times;</button>
 </div>
 <div class="lang-bar">
-  <button class="active" data-lang="nl">NL</button>
-  <button data-lang="uk">UA</button>
   <button data-lang="ru">RU</button>
+  <button data-lang="uk">UA</button>
   <button data-lang="en">EN</button>
+  <button data-lang="nl">NL</button>
 </div>
 <div class="messages" id="messages">
   <div class="message bot" id="welcome"></div>
 </div>
-<div class="quick-actions" id="qa">
-  <div class="quick-action" onclick="sendQuick('Wat zijn jullie diensten?')">📋 Diensten</div>
-  <div class="quick-action" onclick="sendQuick('Hoe registreer ik een bedrijf?')">🏢 KVK registratie</div>
-  <div class="quick-action" onclick="sendQuick('BTW aangifte uitleg')">💰 BTW</div>
-  <div class="quick-action" onclick="sendQuick('Ik ben Oekraïner, wat zijn mijn rechten?')">🇺🇦 Для українців</div>
-</div>
+<div class="quick-actions" id="qa"></div>
 <div class="drop-overlay" id="dropOverlay"><div class="drop-box"><div class="ic">📄</div><p id="dropText">Drop uw document hier</p></div></div>
 <div class="file-bar" id="fileBar">
   <div id="fileThumb"></div>
@@ -114,10 +109,9 @@ const i18n={
     status:'Online — antwoord binnen seconden',
     placeholder:'Stel uw vraag...',
     quickActions:[
-      {label:'📋 Diensten',query:'Wat zijn jullie diensten?'},
-      {label:'🏢 KVK registratie',query:'Hoe registreer ik een bedrijf?'},
-      {label:'💰 BTW',query:'BTW aangifte uitleg'},
-      {label:'🇺🇦 Для українців',query:'Ik ben Oekraïner, wat zijn mijn rechten?'}
+      {label:'👤 Particulier',query:'Ik ben een particulier en heb belastingadvies nodig in Nederland'},
+      {label:'💼 Ondernemer',query:'Ik ben een ZZP\\\'er / eenmanszaak in Nederland'},
+      {label:'🏢 Rechtspersoon',query:'Ik vertegenwoordig een rechtspersoon (BV) in Nederland'}
     ],
     errorMsg:'Er is een fout opgetreden. Probeer het opnieuw.',
     micError:'Microfoon niet beschikbaar',
@@ -131,10 +125,9 @@ const i18n={
     status:'Онлайн — відповідь за кілька секунд',
     placeholder:'Поставте своє запитання...',
     quickActions:[
-      {label:'📋 Послуги',query:'Які у вас послуги?'},
-      {label:'🏢 Реєстрація KVK',query:'Як зареєструвати бізнес?'},
-      {label:'💰 ПДВ',query:'Поясніть подачу ПДВ'},
-      {label:'🇺🇦 Для українців',query:'Я українець, які мої права?'}
+      {label:'👤 Приватна особа',query:'Я приватна особа, мені потрібна допомога з податками в Нідерландах'},
+      {label:'💼 Підприємець',query:'Я індивідуальний підприємець (ZZP/eenmanszaak) в Нідерландах'},
+      {label:'🏢 Юридична особа',query:'Я представляю юридичну особу (BV) в Нідерландах'}
     ],
     errorMsg:'Сталася помилка. Спробуйте ще раз.',
     micError:'Мікрофон недоступний',
@@ -148,10 +141,9 @@ const i18n={
     status:'Онлайн — ответ за несколько секунд',
     placeholder:'Задайте ваш вопрос...',
     quickActions:[
-      {label:'📋 Услуги',query:'Какие у вас услуги?'},
-      {label:'🏢 Регистрация KVK',query:'Как зарегистрировать бизнес?'},
-      {label:'💰 НДС',query:'Объясните подачу НДС'},
-      {label:'🇺🇦 Для українців',query:'Я украинец, какие у меня права?'}
+      {label:'👤 Частное лицо',query:'Я частное лицо, мне нужна помощь с налогами в Нидерландах'},
+      {label:'💼 Предприниматель',query:'Я индивидуальный предприниматель (ZZP/eenmanszaak) в Нидерландах'},
+      {label:'🏢 Юридическое лицо',query:'Я представляю юридическое лицо (BV) в Нидерландах'}
     ],
     errorMsg:'Произошла ошибка. Попробуйте ещё раз.',
     micError:'Микрофон недоступен',
@@ -165,10 +157,9 @@ const i18n={
     status:'Online — reply within seconds',
     placeholder:'Ask your question...',
     quickActions:[
-      {label:'📋 Services',query:'What are your services?'},
-      {label:'🏢 KVK registration',query:'How do I register a business?'},
-      {label:'💰 VAT',query:'Explain VAT filing'},
-      {label:'🇺🇦 For Ukrainians',query:'I am Ukrainian, what are my rights?'}
+      {label:'👤 Individual',query:'I am a private individual seeking tax advice in the Netherlands'},
+      {label:'💼 Entrepreneur',query:'I am a sole proprietor (ZZP/eenmanszaak) in the Netherlands'},
+      {label:'🏢 Company',query:'I represent a legal entity (BV) in the Netherlands'}
     ],
     errorMsg:'An error occurred. Please try again.',
     micError:'Microphone not available',
@@ -270,8 +261,8 @@ async function toggleRecording(){
   if(isRecording){mediaRecorder.stop();return}
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    const mimeType=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
-    mediaRecorder=new MediaRecorder(stream,{mimeType});
+    const mimeType=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':(MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'');
+    mediaRecorder=new MediaRecorder(stream,mimeType?{mimeType}:{});
     audioChunks=[];
     mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data)};
     mediaRecorder.onstop=async()=>{
@@ -304,7 +295,7 @@ async function toggleRecording(){
   }catch(e){showToast((i18n[currentLang]||i18n.nl).micError);console.error(e)}
 }
 
-applyLanguage('nl');
+applyLanguage('ru');
 </script>
 </body>
 </html>
