@@ -28,6 +28,8 @@ async def widget_embed_script(request: Request):
       data-pages       = comma-separated path prefixes to show on (empty = all)
     """
     base_url = str(request.base_url).rstrip("/")
+    if request.headers.get("x-forwarded-proto") == "https":
+        base_url = base_url.replace("http://", "https://", 1)
     script = f"""
 (function() {{
   'use strict';
