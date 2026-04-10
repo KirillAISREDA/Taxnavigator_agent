@@ -76,7 +76,7 @@ async def widget_embed_script(request: Request):
     if (!document.getElementById('taxnav-widget-styles')) {{
       var s = document.createElement('style');
       s.id = 'taxnav-widget-styles';
-      s.textContent = '@keyframes taxnav-spin {{ from {{ transform: rotate(0deg); }} to {{ transform: rotate(360deg); }} }} @keyframes taxnav-twinkle {{ 0%, 100% {{ opacity: 1; transform: scale(1); filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px rgba(255,255,255,0.6)); }} 50% {{ opacity: 0.7; transform: scale(1.4); filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 10px rgba(255,255,255,0.9)); }} }}';
+      s.textContent = '@keyframes taxnav-shimmer {{ 0%, 100% {{ filter: drop-shadow(0 0 2px rgba(255,255,255,0.4)); opacity: 0.9; }} 50% {{ filter: drop-shadow(0 0 6px rgba(255,255,255,1)) drop-shadow(0 0 12px rgba(255,255,255,0.8)); opacity: 1; }} }} #' + BTN_ID + ' svg.taxnav-chat-icon {{ animation: taxnav-shimmer 2s ease-in-out infinite; }}';
       document.head.appendChild(s);
     }}
 
@@ -113,19 +113,8 @@ async def widget_embed_script(request: Request):
     btn.setAttribute('role', 'button');
     btn.setAttribute('aria-label', 'Open chat');
     btn.setAttribute('tabindex', '0');
-    btn.innerHTML =
-      '<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;">' +
-        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="position:relative;z-index:2;">' +
-          '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>' +
-        '</svg>' +
-        '<div style="position:absolute;top:0;left:0;right:0;bottom:0;animation:taxnav-spin 4s linear infinite;">' +
-          '<div style="position:absolute;top:50%;left:50%;margin:-6px 0 0 18px;">' +
-            '<svg viewBox="0 0 24 24" width="12" height="12" fill="#FFFFFF" style="animation:taxnav-twinkle 1.5s ease-in-out infinite;">' +
-              '<path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/>' +
-            '</svg>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
+    btn.innerHTML = '<svg class="taxnav-chat-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">' +
+      '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
     btn.style.cssText = [
       'position:fixed',
       'bottom:' + cfg.offsetY + 'px',
@@ -197,7 +186,7 @@ async def widget_embed_script(request: Request):
         iframe.style.zIndex = '2147483647';
         iframe.style.paddingTop = 'env(safe-area-inset-top)';
         iframe.style.paddingBottom = 'env(safe-area-inset-bottom)';
-        btn.style.bottom = '20px';
+        btn.style.bottom = '0px';
       }} else {{
         iframe.style.width  = '400px';
         iframe.style.height = 'min(600px, calc(100vh - 120px))';
