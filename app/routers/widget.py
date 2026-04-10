@@ -186,7 +186,7 @@ async def widget_embed_script(request: Request):
         iframe.style.zIndex = '2147483647';
         iframe.style.paddingTop = 'env(safe-area-inset-top)';
         iframe.style.paddingBottom = 'env(safe-area-inset-bottom)';
-        btn.style.bottom = '0px';
+        btn.style.bottom = '12px';
       }} else {{
         iframe.style.width  = '400px';
         iframe.style.height = 'min(600px, calc(100vh - 120px))';
@@ -197,7 +197,6 @@ async def widget_embed_script(request: Request):
         iframe.style.zIndex = '2147483646';
         iframe.style.paddingTop = '0';
         iframe.style.paddingBottom = '0';
-        btn.style.bottom = (cfg.offsetY + 70) + 'px';
       }}
     }}
     window.addEventListener('resize', adjustMobile);
